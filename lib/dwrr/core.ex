@@ -44,8 +44,35 @@ defmodule Dwrr.Core do
     {count, %{s | queues: Map.put(queues, count, empty_queue()), count: count + 1}}
   end
 
-  @doc "Drop last queue; repair cursor/active; zero count is a no-op."
-  def remove_queue(s), do: s
+  @doc "Drop last queue and its items; cancel its active visit; repair cursor (SPEC §5.5)."
+  def remove_queue(%Dwrr{count: 0} = s), do: s
+
+  def remove_queue(%Dwrr{count: count, queues: queues, busy: busy, total: total} = s) do
+    last = count - 1
+    %{size: size} = Map.fetch!(queues, last)
+
+    # Step 1: cancel the visit only when it sits on the queue being removed.
+    {active, cursor} =
+      if s.active and s.cursor == last, do: {false, 0}, else: {s.active, s.cursor}
+
+    # Step 3: repair the cursor into 0..last-1.
+    cursor =
+      cond do
+        last == 0 -> 0
+        cursor >= last -> rem(cursor, last)
+        true -> cursor
+      end
+
+    %{
+      s
+      | queues: Map.delete(queues, last),
+        busy: :gb_sets.delete_any(last, busy),
+        total: total - size,
+        count: last,
+        cursor: cursor,
+        active: active
+    }
+  end
 
   @doc "Withdraw FIFO head, no scheduling/debit; emptying resets credit/closes active visit."
   def remove_head(s, index) when is_integer(index) do
