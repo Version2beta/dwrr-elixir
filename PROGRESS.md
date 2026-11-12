@@ -16,3 +16,6 @@ Remaining: remove_queue (T07) is still a stub; take/cursor paths beyond T02 (T10
 T07: implemented Dwrr.Core.remove_queue/1 per SPEC 5.5: no-op at count 0; otherwise cancels the active visit only when it sits on the last queue, deletes that queue with its items (total reduced by its size, busy membership removed), sets count to last, and repairs cursor (0 when last is 0, else cursor mod last when cursor >= last).
 T07 test: MIX_ENV=test mix test test/stage1/07_remove_queue_test.exs --warnings-as-errors --no-color -> Result: 4 passed (exit 0); regression run of T01-T06, T08, T09 files -> 24 passed (exit 0).
 Remaining: take still lacks the idle-cycle skip arithmetic (T14/T15); T10-T13, T16 and the adapter/driver stubs (T19/T20) were not separately validated here; no compile-wide or other-stage validation run.
+T15: huge skips and exact numeric boundaries.
+Work done: added exact idle-cycle arithmetic after B consecutive failed busy visits, counting blocked resumes once and resetting after service; MIX_ENV=test mix test test/stage1/15_boundaries_test.exs --warnings-as-errors --no-color -> Result: 3 passed (exit 0).
+Remaining: no issue observed in the selected tests; other tasks and full-suite validation were not run in this attempt.

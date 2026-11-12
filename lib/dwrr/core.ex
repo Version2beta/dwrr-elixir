@@ -110,7 +110,7 @@ defmodule Dwrr.Core do
 
   @doc "Exact SPEC take; sparse traversal; skip only after a full unproductive cycle."
   def take(_s, n) when is_integer(n) and n < 0, do: {:error, :negative_take}
-  def take(s, n) when is_integer(n), do: serve(s, n, [])
+  def take(s, n) when is_integer(n), do: serve(s, n, [], 0)
   def take(_s, _n), do: raise(ArgumentError, "take count must be an integer")
 
   defp empty_queue, do: %{quantum: 1, credit: 0, size: 0, head: nil, tail: :queue.new()}
@@ -173,29 +173,38 @@ defmodule Dwrr.Core do
 
   # Serves items in SPEC §5.8 order, visiting only busy queues. Empty queues
   # are skipped via the busy index; each skip matches the spec's no-op advance.
-  defp serve(s, 0, out), do: {:ok, Enum.reverse(out), s}
+  defp serve(s, 0, out, _failed), do: {:ok, Enum.reverse(out), s}
 
-  defp serve(%Dwrr{busy: busy} = s, left, out) do
+  defp serve(%Dwrr{busy: busy} = s, left, out, failed) do
     if :gb_sets.is_empty(busy) do
       {:ok, Enum.reverse(out), s}
     else
-      serve_cursor(s, left, out)
+      serve_cursor(s, left, out, failed)
     end
   end
 
-  defp serve_cursor(%Dwrr{cursor: q, queues: queues, active: active} = s, left, out) do
+  defp serve_cursor(%Dwrr{cursor: q, queues: queues, active: active} = s, left, out, failed) do
     rec = Map.fetch!(queues, q)
 
     cond do
       not active and rec.size == 0 ->
-        serve(%{s | cursor: next_busy(s.busy, q)}, left, out)
+        serve(%{s | cursor: next_busy(s.busy, q)}, left, out, failed)
 
       not active ->
         rec = %{rec | credit: rec.credit + rec.quantum}
-        serve(%{s | queues: Map.put(queues, q, rec), active: true}, left, out)
+        serve(%{s | queues: Map.put(queues, q, rec), active: true}, left, out, failed)
 
       rec.credit < rec.head.cost ->
-        serve(close_visit(s), left, out)
+        s = close_visit(s)
+        failed = failed + 1
+
+        # A blocked resume counts without a new grant. Only a complete run of
+        # failed busy visits proves every head is still unaffordable.
+        if failed == :gb_sets.size(s.busy) do
+          serve(skip_idle_cycles(s), left, out, 0)
+        else
+          serve(s, left, out, failed)
+        end
 
       true ->
         serve_head(s, q, rec, left, out)
@@ -218,7 +227,7 @@ defmodule Dwrr.Core do
           total: s.total - 1
       }
 
-      serve(close_visit(s), left - 1, out)
+      serve(close_visit(s), left - 1, out, 0)
     else
       rec = %{rec | credit: credit, head: next_head, tail: next_tail, size: size}
 
@@ -228,7 +237,45 @@ defmodule Dwrr.Core do
           total: s.total - 1
       }
 
-      serve(s, left - 1, out)
+      serve(s, left - 1, out, 0)
+    end
+  end
+
+  # Called only after every busy head failed since the last service. Each
+  # skipped cycle leaves all heads blocked and returns to this inactive cursor.
+  defp skip_idle_cycles(s) do
+    rounds = idle_rounds(:gb_sets.iterator(s.busy), s.queues, nil)
+
+    if rounds > 0 do
+      queues = grant_idle_rounds(:gb_sets.iterator(s.busy), s.queues, rounds)
+      %{s | queues: queues}
+    else
+      s
+    end
+  end
+
+  defp idle_rounds(iterator, queues, minimum) do
+    case :gb_sets.next(iterator) do
+      {index, rest} ->
+        rec = Map.fetch!(queues, index)
+        rounds = div(rec.head.cost - rec.credit - 1, rec.quantum)
+        minimum = if minimum == nil, do: rounds, else: min(minimum, rounds)
+        idle_rounds(rest, queues, minimum)
+
+      :none ->
+        minimum
+    end
+  end
+
+  defp grant_idle_rounds(iterator, queues, rounds) do
+    case :gb_sets.next(iterator) do
+      {index, rest} ->
+        rec = Map.fetch!(queues, index)
+        rec = %{rec | credit: rec.credit + rounds * rec.quantum}
+        grant_idle_rounds(rest, Map.put(queues, index, rec), rounds)
+
+      :none ->
+        queues
     end
   end
 
