@@ -4,7 +4,16 @@ defmodule Dwrr.Core do
   # Outside documented types raise ArgumentError (guard fallbacks must raise).
   # Shared errors return tagged atoms without modifying the input scheduler.
   @doc "Construct count default queues; zero is valid."
-  def new(_count), do: %Dwrr{}
+  def new(count) when is_integer(count) and count >= 0 do
+    queues =
+      Map.new(0..(count - 1)//1, fn i ->
+        {i, %{quantum: 1, credit: 0, size: 0, head: nil, tail: :queue.new()}}
+      end)
+
+    %Dwrr{queues: queues, busy: :gb_sets.empty(), count: count}
+  end
+
+  def new(_count), do: raise(ArgumentError, "count must be a nonnegative integer")
   @doc "Validate index, then all costs in order, before FIFO append."
   def enqueue(s, _index, _items), do: {:ok, s}
   @doc "Validate index then quantum; do not touch credit or active."
