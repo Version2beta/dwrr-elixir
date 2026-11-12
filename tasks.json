@@ -1,0 +1,221 @@
+{
+  "format": "mix format",
+  "format_check": "mix format --check-formatted",
+  "check": "MIX_ENV=test mix compile --warnings-as-errors",
+  "protected": [
+    "^test/",
+    "^conformance/parser\\.ex$",
+    "^lib/dwrr\\.ex$",
+    "^lib/dwrr/(item|scheduled)\\.ex$",
+    "^mix\\.exs$",
+    "^\\.formatter\\.exs$",
+    "^\\.gitignore$",
+    "^scripts/",
+    "^docs/",
+    "^README\\.md$",
+    "^LICENSE$"
+  ],
+  "tasks": [
+    {
+      "id": "T01",
+      "title": "Constructor, typed domain and initial invariants",
+      "test": "MIX_ENV=test mix test test/stage1/01_constructor_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 3 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T02",
+      "title": "Queue indexes and shared error precedence",
+      "test": "MIX_ENV=test mix test test/stage1/02_indexes_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 3 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T03",
+      "title": "Quantum validation and preserved visits",
+      "test": "MIX_ENV=test mix test test/stage1/03_quantum_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 4 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T04",
+      "title": "Atomic enqueue and cost validation",
+      "test": "MIX_ENV=test mix test test/stage1/04_enqueue_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 3 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T05",
+      "title": "FIFO and opaque values",
+      "test": "MIX_ENV=test mix test test/stage1/05_fifo_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 3 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T06",
+      "title": "Append queues and preserve visits",
+      "test": "MIX_ENV=test mix test test/stage1/06_add_queue_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 2 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T07",
+      "title": "Remove last queue and repair cursor",
+      "test": "MIX_ENV=test mix test test/stage1/07_remove_queue_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 4 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T08",
+      "title": "Withdraw a head without scheduling",
+      "test": "MIX_ENV=test mix test test/stage1/08_remove_head_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 3 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T09",
+      "title": "Drain FIFO and close active visits",
+      "test": "MIX_ENV=test mix test test/stage1/09_drain_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 3 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T10",
+      "title": "Basic exact take and blocked heads",
+      "test": "MIX_ENV=test mix test test/stage1/10_basic_take_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 3 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T11",
+      "title": "Take zero, negative and empty cases",
+      "test": "MIX_ENV=test mix test test/stage1/11_take_edges_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 3 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T12",
+      "title": "Paused visits and split take",
+      "test": "MIX_ENV=test mix test test/stage1/12_paused_visit_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 3 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T13",
+      "title": "Enqueue and reweight during a visit",
+      "test": "MIX_ENV=test mix test test/stage1/13_mid_visit_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 3 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T14",
+      "title": "Unproductive-cycle skipping and productive work bound",
+      "test": "MIX_ENV=test mix test test/stage1/14_idle_cycles_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 4 passed$"
+      ],
+      "tier": "hard"
+    },
+    {
+      "id": "T15",
+      "title": "Huge skips and exact numeric boundaries",
+      "test": "MIX_ENV=test mix test test/stage1/15_boundaries_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 3 passed$"
+      ],
+      "tier": "hard"
+    },
+    {
+      "id": "T16",
+      "title": "Sparse busy selection and FIFO workload",
+      "test": "MIX_ENV=test mix test test/stage1/16_sparse_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 3 passed$"
+      ],
+      "tier": "hard"
+    },
+    {
+      "id": "T17",
+      "title": "Native small corpus (all four files)",
+      "test": "MIX_ENV=test mix test test/stage1/17_small_corpus_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 4 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T18",
+      "title": "Native random corpus (all three files)",
+      "test": "MIX_ENV=test mix test test/stage1/18_random_corpus_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 3 passed$"
+      ],
+      "tier": "hard"
+    },
+    {
+      "id": "T19",
+      "title": "Driver response/state adapter",
+      "test": "MIX_ENV=test mix test test/stage1/19_adapter_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 3 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T20",
+      "title": "JSONL driver and strict protocol",
+      "test": "MIX_ENV=test mix test test/stage1/20_driver_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 4 passed$"
+      ],
+      "tier": "hard"
+    },
+    {
+      "id": "T21",
+      "title": "Integration and external corpus replay",
+      "test": "MIX_ENV=test mix test test/stage1/21_integration_test.exs --warnings-as-errors --no-color && python3 ../dwrr-spec/tools/replay.py --driver 'env MIX_ENV=test mix run --no-compile --no-start scripts/conformance_driver.exs'",
+      "expect": [
+        "^Result: 2 passed$",
+        "^PASS: 1839 cases, 44728 steps, 7 files$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T22",
+      "title": "Whole tree: formatted, warnings-as-errors, all tests, both conformance tools",
+      "test": "mix format --check-formatted && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test --warnings-as-errors --no-color && python3 ../dwrr-spec/tools/replay.py --driver 'env MIX_ENV=test mix run --no-compile --no-start scripts/conformance_driver.exs' && python3 ../dwrr-spec/tools/check_driver.py --driver 'env MIX_ENV=test mix run --no-compile --no-start scripts/conformance_driver.exs'",
+      "expect": [
+        "^Result: 66 passed$",
+        "^PASS: 1839 cases, 44728 steps, 7 files$",
+        "^PASS: 36 of 36 checks passed$"
+      ],
+      "tier": "hard"
+    }
+  ]
+}
