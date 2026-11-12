@@ -22,3 +22,6 @@ Remaining: no issue observed in the selected tests; other tasks and full-suite v
 T19: implemented Dwrr.Conformance.Adapter.apply/2 for every parsed request shape: nil state requires {:new, n} (ArgumentError otherwise), core results map to PROTOCOL.md wire maps (Scheduled/Item to queue/value/cost with cost as a decimal string, nil and lists preserved), and scheduler errors return {original_state, %{"error" => code}}.
 T19 test: MIX_ENV=test mix test test/stage1/19_adapter_test.exs --warnings-as-errors --no-color -> Result: 3 passed (exit 0); mix format --check-formatted conformance/adapter.ex passes.
 Remaining: Driver.run/0 is still the T20 stub (returns :ok without reading stdin); the other stage-1 tests and the full suite were not run in this attempt.
+T20: JSONL driver and strict protocol.
+Work done: implemented fully parsed request dispatch with threaded state, synchronous JSONL writes, EOF return, and category-only stderr plus exit 2 for protocol errors; MIX_ENV=test mix test test/stage1/20_driver_test.exs --warnings-as-errors --no-color -> Result: 4 passed (exit 0).
+Remaining: no issue observed in selected tests; full-suite and external conformance validation were not run in this attempt.
