@@ -10,3 +10,6 @@ Remaining: take steps cycle by cycle with no idle-round skip (T14/T15); set_quan
 T03: implemented Dwrr.Core.set_quantum/3 with index-first check, zero_quantum and quantum_too_large shared errors, ArgumentError for non-integer or negative quantum, and a put_quantum helper that replaces only the quantum (credit and active preserved).
 T03 test: MIX_ENV=test mix test test/stage1/03_quantum_test.exs --warnings-as-errors --no-color -> Result: 4 passed (exit 0); T01 and T02 still 3 passed each.
 Remaining: remove_queue, remove_head, drain_queue, and the enqueue/take paths beyond T02 still need their full bodies (T04-T16); no compile-wide or other-stage validation run.
+T05: implemented FIFO withdrawal in Dwrr.Core.remove_head/2 and drain_queue/2 (head removal and full drain return items in FIFO order, update total and busy membership, and reset credit/close the active visit only on emptying per SPEC 5.6-5.7 via a withdraw helper).
+T05 test: MIX_ENV=test mix test test/stage1/05_fifo_test.exs --warnings-as-errors --no-color -> Result: 3 passed (exit 0); T01-T04 still pass; T08 and T09 test files also pass incidentally (not separately claimed).
+Remaining: remove_queue (T07) is still a stub; take/cursor paths beyond T02 (T10-T16) and corpus/driver/adapter stubs are unvalidated; no compile-wide or other-stage validation run.

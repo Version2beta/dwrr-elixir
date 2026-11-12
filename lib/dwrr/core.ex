@@ -49,14 +49,34 @@ defmodule Dwrr.Core do
 
   @doc "Withdraw FIFO head, no scheduling/debit; emptying resets credit/closes active visit."
   def remove_head(s, index) when is_integer(index) do
-    with :ok <- check_index(s, index), do: {:ok, nil, s}
+    with :ok <- check_index(s, index) do
+      case Map.fetch!(s.queues, index) do
+        %{size: 0} ->
+          {:ok, nil, s}
+
+        %{head: removed} = rec ->
+          {next_head, next_tail, size} = pop(rec)
+          rec = %{rec | head: next_head, tail: next_tail, size: size}
+          {:ok, removed, withdraw(s, index, rec, 1)}
+      end
+    end
   end
 
   def remove_head(_s, _index), do: raise(ArgumentError, "queue index must be an integer")
 
   @doc "Withdraw FIFO contents; reset credit and close that active visit."
   def drain_queue(s, index) when is_integer(index) do
-    with :ok <- check_index(s, index), do: {:ok, [], s}
+    with :ok <- check_index(s, index) do
+      case Map.fetch!(s.queues, index) do
+        %{size: 0} ->
+          {:ok, [], s}
+
+        %{head: head, tail: tail, size: size} = rec ->
+          items = [head | :queue.to_list(tail)]
+          rec = %{rec | head: nil, tail: :queue.new(), size: 0}
+          {:ok, items, withdraw(s, index, rec, size)}
+      end
+    end
   end
 
   def drain_queue(_s, _index), do: raise(ArgumentError, "queue index must be an integer")
@@ -182,6 +202,25 @@ defmodule Dwrr.Core do
       }
 
       serve(s, left - 1, out)
+    end
+  end
+
+  # Stores a queue after FIFO withdrawal (no scheduling). Emptying resets credit
+  # and closes the visit only when that queue is the active cursor (SPEC §5.6-5.7).
+  defp withdraw(%Dwrr{queues: queues, busy: busy, total: total} = s, index, rec, removed) do
+    if rec.size == 0 do
+      rec = %{rec | credit: 0}
+
+      s = %{
+        s
+        | queues: Map.put(queues, index, rec),
+          busy: :gb_sets.delete_any(index, busy),
+          total: total - removed
+      }
+
+      if s.active and s.cursor == index, do: close_visit(s), else: s
+    else
+      %{s | queues: Map.put(queues, index, rec), total: total - removed}
     end
   end
 
