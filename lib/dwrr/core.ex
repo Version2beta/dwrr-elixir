@@ -29,8 +29,11 @@ defmodule Dwrr.Core do
   def enqueue(_s, _index, _items), do: raise(ArgumentError, "queue index must be an integer")
 
   @doc "Validate index then quantum; do not touch credit or active."
-  def set_quantum(s, index, _quantum) when is_integer(index) do
-    with :ok <- check_index(s, index), do: {:ok, s}
+  def set_quantum(s, index, quantum) when is_integer(index) do
+    with :ok <- check_index(s, index),
+         :ok <- check_quantum(quantum) do
+      {:ok, put_quantum(s, index, quantum)}
+    end
   end
 
   def set_quantum(_s, _index, _quantum),
@@ -68,6 +71,23 @@ defmodule Dwrr.Core do
   # Index precedes every other enqueue/set_quantum check (SPEC §5.2, §5.3).
   defp check_index(%Dwrr{count: count}, index) when index >= 0 and index < count, do: :ok
   defp check_index(_s, _index), do: {:error, :invalid_index}
+
+  # Quantum must be 1..MAX_QUANTUM; 0 and too-large are shared errors, other inputs raise.
+  defp check_quantum(0), do: {:error, :zero_quantum}
+
+  defp check_quantum(quantum) when is_integer(quantum) and quantum > @max_cost,
+    do: {:error, :quantum_too_large}
+
+  defp check_quantum(quantum) when is_integer(quantum) and quantum > 0, do: :ok
+
+  defp check_quantum(_quantum),
+    do: raise(ArgumentError, "quantum must be a nonnegative integer")
+
+  # Replaces only the quantum; credit and active are preserved (SPEC §5.3).
+  defp put_quantum(%Dwrr{queues: queues} = s, index, quantum) do
+    rec = Map.fetch!(queues, index)
+    %{s | queues: Map.put(queues, index, %{rec | quantum: quantum})}
+  end
 
   # Validates every item in order before any append (atomic batch).
   defp check_items([]), do: :ok
