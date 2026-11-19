@@ -99,6 +99,18 @@ PASS: 1839 cases, 44728 steps, 7 files
 PASS: 36 of 36 checks passed
 ```
 
+### Working-tree consistency checks (separate from the historical pin)
+
+The sibling working-tree checker retains the original 36 checks and adds five
+protocol-error checks plus interactive unused-recognized-field and arbitrary-size
+integer histories. It now reports `PASS: 41 of 41 checks passed`. The pinned
+commands/36-check expectation above and protected fixture provenance are historical
+and unchanged, not a claim that the updated checker exists at that old commit.
+Current-source Elixir passed the expanded checker and the same 1,839-case /
+44,728-step replay; the native suite passed 97 checks (8 properties, 89 tests).
+These local checks do not establish minimum-runtime or hosted-CI compatibility.
+No corpus, hash guard, tool pin or dependency was changed for this correction.
+
 ## Verification status
 
 The local runs used Elixir 1.20.4 on OTP 29. The minimum pairing (Elixir 1.18.4

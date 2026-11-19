@@ -1,6 +1,12 @@
-# dwrr-elixir — approved specification draft; stage-2 kit prepared
+# dwrr-elixir — approved specification draft; implemented checkout
 
-**Current status:** owner stage-1 loop completed at audited HEAD `7205252`;
+**Current source status:** core, driver, Server, public docs and metadata are
+implemented; intended 0.1.0 remains unpublished. Preparation/stub statements below
+are historical evidence boundaries, not descriptions of the delivered source.
+Pinned fixtures/CI retain shared `8a0e3cf` provenance; working-tree shared
+consistency corrections are described in the root README/SPEC without repinning.
+
+**Historical preparation status:** owner stage-1 loop completed at audited HEAD `7205252`;
 local stage-2 preparation is authorized, not a stage-2 coder/model loop. Binding
 stage-2 contracts are numbered Part 2 of `../SPEC.md`. See
 [STAGE2-VERIFICATION.md](STAGE2-VERIFICATION.md) for current executed evidence
@@ -167,7 +173,7 @@ python3 ../dwrr-spec/tools/check_driver.py --driver 'env MIX_ENV=test mix run --
 - Read UTF-8, one JSON object per input line; output exactly one compact JSON object and newline per valid request, nothing else on stdout. Flush after **every** response. A pipelined bulk replay alone does not prove flushing: add a handshake test that waits for response before sending the next request.
 - EOF exits 0. Malformed JSON/shape, unknown op, or a request before first `new` prints a non-sensitive diagnostic to stderr and exits **2**. No scheduler-error response for protocol failures; no extra stdout line. Blank lines are protocol failures (exit 2), not skipped.
 - Scheduler errors emit `{"error":"code"}` and continue; state remains unchanged. A second `new` replaces the held scheduler.
-- `cost` and `quantum` are decimal **strings**, including returned costs. Require the full-string canonical decimal grammar `0|[1-9][0-9]*`: no signs, whitespace or leading zeros. Parse exact integers in wire range 0..2^64−1; outside that range is protocol failure. Zero/above-scheduler-limit but in-wire-range integers reach scheduler validation. Index/count/n and item values are JSON integer numbers, not floats/strings; required corpus range −2^31..2^31−1. No coercions; broader ranges for those JSON integer fields remain unspecified.
+- `cost` and `quantum` are decimal **strings**, including returned costs. Require the full-string canonical decimal grammar `0|[1-9][0-9]*`: no signs, whitespace or leading zeros. Parse exact integers in wire range 0..2^64−1; outside that range is protocol failure. Zero/above-scheduler-limit but in-wire-range integers reach scheduler validation. Index/count/n and item values are JSON integer numbers, not floats/strings; required corpus range −2^31..2^31−1. No coercions; the corpus range is not a protocol magnitude cap (see the clarification below).
 - Validate **all required protocol types, shapes, syntax and wire ranges before any scheduler validation**, including every item in a batch. Missing required fields fail; extra fields are ignored. Duplicate JSON keys are unspecified. Only after parsing succeeds apply shared scheduler precedence: an invalid index beats a parsed zero/oversized cost or quantum. Example: invalid index plus cost `"0"` yields `invalid_index`; invalid index plus cost `"01"`, a numeric cost, malformed item shape or out-of-wire-range cost exits 2 without a scheduler response. This is protocol-first parsing, not cost-before-index scheduler validation.
 - `new`, `enqueue`, `set_quantum`, `remove_queue`: `{"ok":null}`; add: `{"ok":new_index}`; remove-head: `{"ok":null}` or `{"ok":{"value":v,"cost":"c"}}`; drain: `{"ok":[{"value":v,"cost":"c"},...]}`; take: `{"ok":[{"queue":q,"value":v,"cost":"c"},...]}`. Empty collections are `[]`, not null. Values are unchanged integer JSON numbers on the wire, even though core accepts any term.
 - Compare parsed JSON exactly; whitespace/key ordering irrelevant; strings versus numbers distinct. Reject invalid UTF-8 and nonobjects without a crash stack trace containing payloads. No dynamic atom creation from untrusted op/error/keys; use fixed dispatch strings and fixed atoms.
@@ -286,9 +292,9 @@ Owner cleared the preparation hold after skill fixes. Stage-1 results are record
 
 Only after verified kit and owner's separate clean-branch/commit/spending authorization does the **owner** run loops on branches, then return for strong-model review. No loop now; no implicit commits now. Copy installed loop unchanged unless owner approves a skill-level correction; any workaround in kit settings needs its own exactness proof.
 
-## 14. Approved Elixir mapping for future upstream §11 update
+## 14. Approved Elixir mapping (now also in sibling working-tree §11)
 
-No change to `/Users/rob/Development/dwrr-spec` is made here. The owner's upstream protocol updates are present in the newly pinned 0.1.1 revision. The following records the approved Elixir column for a future SPEC §11 change (retain the Go column):
+The historical preparation made no upstream edit. The consistency correction now adds this approved Elixir column to the sibling working-tree SPEC §11, retaining Go; the vendored historical source pin remains unchanged:
 
 | Operation | Elixir (`Dwrr`, dwrr-elixir) |
 |---|---|
@@ -329,9 +335,11 @@ authorized helper-only change sets assert_receive_timeout 1000ms; its original
 SHA provenance and new protected overlay SHA are recorded separately. README,
 release docs and Mix metadata are writable targets; CI is complete/protected.
 
-Preparation is sole-writer delegated implementation work under explicit owner
-authority, not the original stage-1 owner's model loop. Private Server/docs
-implementation is outside the kit; delivered Server/docs/metadata remain stubs.
+Historically, preparation was sole-writer delegated implementation work under
+explicit owner authority, not the original stage-1 owner's model loop. At that
+preparation checkpoint private Server/docs implementation was outside the kit and
+delivered Server/docs/metadata were stubs. They are now implemented in this
+checkout; the following records historical preparation evidence only.
 CI is identical, complete and protected in both trees. Only
 installed Elixir1.20.4/OTP29 executed. Minimum1.18/27 and hosted CI remain unrun;
 no runtime-install/Docker/model/provider inference or publication was done.

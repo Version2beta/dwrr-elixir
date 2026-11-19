@@ -44,7 +44,7 @@ operations actually returned.
 
 ### Byte sharing
 
-Queue 0 has quantum 2 and queue 1 has quantum 3. Queue 0 serves `packet_a` and then
+Queue 0 has quantum 2 and queue 1 has quantum 3. Queue 0 serves `packet_a`, then blocks on
 `packet_b`. Queue 1 cannot yet afford `packet_x` (cost 4), so it keeps its 3 credit.
 Queue 0 then serves `packet_b`, and queue 1 serves `packet_x` and `packet_y`.
 
@@ -210,6 +210,30 @@ The conformance replay needs a sibling `dwrr-spec` checkout at the pinned commit
 - **Pure coordination, not a worker pool.** `Dwrr` decides which item is served next.
   It does not start processes, run jobs or manage a pool of workers. The caller does
   the work. `Dwrr.Server` is a serialized mailbox around one scheduler, not a pool.
+
+## Current implementation and shared-source status
+
+The pure core, driver, optional Server, public docs and package metadata are
+implemented in this checkout; intended 0.1.0 remains unpublished. The owner-run
+kit instructions below are historical preparation instructions, not a statement
+that these files are still stubs or authorization to rerun a loop.
+
+Vendored SPEC/PROTOCOL/corpus and their hash guards deliberately retain the
+historical `8a0e3cf9ae860ba207213590c00feeb822bdd8f2` snapshot. Sibling working-tree
+corrections clarify that negative costs/quanta are language-local and wire
+integers have no signed-32-bit protocol cap, add language mappings, and repair
+the Go adapter/checker; no scheduler semantics or corpus bytes changed. They do
+not silently repin these historical fixtures or CI. Current-source Elixir was
+also checked against the expanded sibling checker: **41/41**, plus all
+**1,839 cases / 44,728 steps**. Python is still an unapproved design target, not
+a working third implementation. Go's unreleased callbacks/result API and its
+generation-exhaustion restriction are not shared fixed-core requirements.
+The sibling protocol now permits native count-representation exhaustion as a
+resource failure, not malformed input: Go detects counts above native `int` before
+allocation, emits stderr and exits 1 with no response or later processing; prior
+responses stand. This adds no shared count cap or Elixir rejection requirement,
+and guarantees no controlled recovery from actual allocation limits/OOM. Frozen
+vendored documents and identities above remain unchanged.
 
 ## Apply and run the stage-2 kit (owner only)
 

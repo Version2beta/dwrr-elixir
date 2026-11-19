@@ -6,7 +6,17 @@ Complete; do not change. Approved owner decisions plus dwrr-spec 0.1.1 at
 precedence and limits, and `PROTOCOL.md` in that directory for the complete wire
 contract. They are part of this binding spec, not optional reference behavior.
 The Go source is informative only. docs/SPEC-DRAFT.md records architecture and
-stage-2 plans; only stage 1 is implemented now.
+historical stage-2 preparation. The core, driver, Server, public docs and metadata
+are now implemented; Part 2 supersedes the historical stage-1-only kit boundary.
+Intended 0.1.0 is still unpublished.
+
+The vendored documents and provenance remain the immutable historical pin above,
+including the original 36-check tool hash. The sibling working-tree consistency
+corrections change no scheduler semantics/corpus bytes; they clarify the existing
+nonnegative cost/quantum domain and uncapped wire integers and add mapping/status
+notes. Current-source Elixir additionally passes the expanded 41-check sibling
+tool and the full 1,839-case / 44,728-step replay. No historical fixture/hash/CI
+identity is rewritten to pretend these uncommitted corrections are a new pin.
 
 ## Public contract
 
@@ -94,7 +104,7 @@ No allocation proportional to requested n. No claimed secure erase or Go parity.
 
 ## Driver
 
-Complete parser is protected; implement Adapter and Driver stubs. Parse a whole
+Parser, Adapter and Driver are implemented. Parse a whole
 request before invoking scheduler logic. Built-in JSON decode preserves integer
 vs float/exponent distinctions. Costs/quanta are canonical decimal strings (0 or
 nonzero digit then digits), unsigned <=2^64-1. Values/index/count/n are JSON integers;
