@@ -1,7 +1,215 @@
 # dwrr-elixir
 
-Stage-2 spec-loop kit over the completed stage-1 core. Release README/examples
-remain the T24 implementation target; this is not a published release.
+Deficit weighted round robin (DWRR) scheduler for Elixir. The core is a set of
+pure functions over immutable values. `Dwrr.Server` is an optional, caller-owned
+wrapper that keeps one scheduler in one process.
+
+Intended release: **0.1.0**, not yet published. The Hex package and application
+are `dwrr`.
+
+## The need
+
+When several queues share one resource, such as a link, a packet path or a job
+pool, each queue should get a share in proportion to its quantum. DWRR does this
+with small integer bookkeeping, and it measures work by the cost callers declare,
+not by elapsed time. This library gives you that scheduler as plain values you can
+store, branch and test.
+
+## At a glance
+
+- `Dwrr` is pure: no process, no I/O, no hidden state. Each successful operation
+  returns a new scheduler value.
+- `Dwrr.Server` is a serialized GenServer around one scheduler. You start and
+  supervise it; the library starts nothing for you.
+- Requires Elixir >= 1.18 and OTP >= 27. No runtime dependencies. StreamData is
+  a test-only dependency.
+- MIT licensed.
+
+## Quick start
+
+The intended dependency for release 0.1.0 is:
+
+```text
+{:dwrr, "~> 0.1.0"}
+```
+
+The package is not on Hex yet, so this line is the intended install, not a working
+fetch today. Until release, depend on this repository directly (for example a
+`path:` dependency) and run `mix deps.get`.
+
+## Examples
+
+Each example is an independent history. Each one binds `result` to what the
+operations actually returned.
+
+### Byte sharing
+
+Queue 0 has quantum 2 and queue 1 has quantum 3. Queue 0 serves `packet_a` and then
+`packet_b`. Queue 1 cannot yet afford `packet_x` (cost 4), so it keeps its 3 credit.
+Queue 0 then serves `packet_b`, and queue 1 serves `packet_x` and `packet_y`.
+
+```elixir
+s = Dwrr.new(2)
+{:ok, s} = Dwrr.set_quantum(s, 0, 2)
+{:ok, s} = Dwrr.set_quantum(s, 1, 3)
+
+{:ok, s} =
+  Dwrr.enqueue(s, 0, [
+    %Dwrr.Item{value: :packet_a, cost: 2},
+    %Dwrr.Item{value: :packet_b, cost: 2}
+  ])
+
+{:ok, s} =
+  Dwrr.enqueue(s, 1, [
+    %Dwrr.Item{value: :packet_x, cost: 4},
+    %Dwrr.Item{value: :packet_y, cost: 1}
+  ])
+
+{:ok, served, _s} = Dwrr.take(s, 10)
+result = Enum.map(served, &{&1.queue, &1.value, &1.cost})
+```
+
+### Caller-owned worker orchestration
+
+The `Server` only decides the order of jobs. It does not run them. The caller
+receives the jobs and runs them itself. This example stops the server it started,
+even if an operation fails.
+
+```elixir
+{:ok, server} = Dwrr.Server.start_link(1)
+
+result =
+  try do
+    {:ok, _scheduler} =
+      Dwrr.Server.enqueue(server, 0, [
+        %Dwrr.Item{value: :job_a, cost: 1},
+        %Dwrr.Item{value: :job_b, cost: 1}
+      ])
+
+    {:ok, served, _scheduler} = Dwrr.Server.take(server, 2)
+    Enum.map(served, & &1.value)
+  after
+    GenServer.stop(server)
+  end
+```
+
+### Pure withdrawal
+
+`remove_head/2` withdraws the first item without spending credit. `drain_queue/2`
+then withdraws the rest in FIFO order.
+
+```elixir
+s = Dwrr.new(1)
+
+{:ok, s} =
+  Dwrr.enqueue(s, 0, [
+    %Dwrr.Item{value: :cancelled, cost: 5},
+    %Dwrr.Item{value: :kept, cost: 1}
+  ])
+
+{:ok, cancelled, s} = Dwrr.remove_head(s, 0)
+{:ok, kept, _s} = Dwrr.drain_queue(s, 0)
+result = {[cancelled.value], Enum.map(kept, & &1.value)}
+```
+
+### Atomic error
+
+Enqueue checks every item before it adds any. The valid item is not kept when the
+zero-cost item fails. A later `take` on the original scheduler returns nothing.
+
+```elixir
+s = Dwrr.new(1)
+
+result =
+  Dwrr.enqueue(s, 0, [
+    %Dwrr.Item{value: :valid, cost: 1},
+    %Dwrr.Item{value: :invalid, cost: 0}
+  ])
+
+{:ok, [], _s} = Dwrr.take(s, 10)
+```
+
+## Behavior worth knowing
+
+- **Results.** Most operations return `{:ok, scheduler}`, `{:ok, value, scheduler}`
+  or `{:error, code}`. `add_queue/1` returns `{index, scheduler}`. `remove_queue/1`
+  returns the scheduler alone.
+- **Six tagged errors.** `:invalid_index`, `:negative_take`, `:zero_cost`,
+  `:cost_too_large`, `:zero_quantum` and `:quantum_too_large`. A tagged error returns
+  no new scheduler; it retains the input unchanged, so keep using the scheduler you passed in.
+- **ArgumentError.** A non-integer index or count, a negative count, or a negative
+  cost or quantum raises `ArgumentError`. It is not a tagged error.
+- **Immutable storage.** Old snapshots stay valid. One snapshot can be branched into
+  separate histories, and branches do not share writes. Values are stored and
+  returned without being inspected.
+- **FIFO, no overtaking.** Items leave a queue in order. A queue whose head costs
+  more than its credit waits, and later items in that queue do not jump ahead.
+- **Take is a retrieval limit, not a fairness cap.** `take/2` returns up to `n` items in service order. If it
+  stops at `n` in the middle of a visit, that visit stays paused with its remaining
+  credit, and the next `take` continues it without another quantum grant. It returns
+  fewer than `n` only when every queue is empty.
+- **Enqueue joins the visit.** Items added to the queue being visited join that
+  visit; they do not start a new grant.
+- **Reweight affects the next grant.** `set_quantum/3` changes only the quantum used
+  for the next grant. Credit is kept.
+- **Withdrawal.** `remove_head/2` and `drain_queue/2` do not spend credit. Emptying a
+  queue resets its credit to 0.
+- **Last-queue deletion and index reuse.** `remove_queue/1` deletes only the last
+  queue, with its items. `add_queue/1` may then reuse that index.
+- **Limits.** Costs and quanta are limited to 2^63-1. Each queue's credit stays within
+  2^64-3. These are shared scheduler limits, not BEAM integer limits.
+- **Fairness is by declared cost.** While queues stay backlogged, each queue's served
+  cost stays within one maximum item cost of its quantum times the number of its
+  visits. This is not an unrestricted fairness promise for dynamic backlogs. The
+  scheduler does not measure time.
+- **Server.** Each call is one `GenServer.call/2` with the default 5000 ms timeout.
+  A timeout does not prove that the operation was rolled back. There are no retries
+  and no backpressure. An argument outside the `Dwrr` domain raises `ArgumentError`
+  inside the server, which then terminates. The caller sees an exit, not a tagged
+  error. A restarted server starts fresh from its original count, so queued items,
+  quantum changes and added queues are lost. Nothing is persisted.
+
+## How we know it's correct
+
+- The behavior follows a written spec, pinned in the sibling `dwrr-spec` repository,
+  with a shared conformance corpus. The corpus responses were recorded from the Go
+  implementation `github.com/version2beta/dwrr` v0.10.1.
+- Property tests (StreamData 1.3.0, test-only) run generated operation sequences
+  against a naive reference model. They compare every result and state, and check
+  item conservation, FIFO order, state after errors, branching and deterministic
+  replay.
+- The conformance driver replays that corpus through the Elixir implementation.
+- Focused tests cover each operation and the `Dwrr.Server` behavior.
+
+Local verification ran on Elixir 1.20.4 / OTP 29. The minimum Elixir 1.18 / OTP 27
+and the full CI matrix (Elixir 1.18.4 / OTP 27.3 and Elixir 1.20.4 / OTP 29.1.2) are
+configured but not verified by this README. See [TESTING.md](TESTING.md).
+
+## Check it yourself
+
+Run these from the repository root:
+
+```sh
+MIX_ENV=test mix deps.get --check-locked
+mix format --check-formatted
+mix compile --warnings-as-errors
+MIX_ENV=test mix test --warnings-as-errors --no-color
+```
+
+The conformance replay needs a sibling `dwrr-spec` checkout at the pinned commit.
+[TESTING.md](TESTING.md) lists the exact commands.
+
+## How it compares
+
+- **Go `dwrr`.** The spec maps each operation to the Go library (SPEC section 11).
+  Go panics on `invalid_index` and `negative_take`. Here they are tagged errors,
+  `{:error, :invalid_index}` and `{:error, :negative_take}`.
+- **BEAM storage.** Scheduler values are ordinary immutable Erlang terms. There is no
+  shared memory and no mutable state. Old snapshots stay valid, and the cost and
+  credit limits are the same in every language, not the BEAM's integer limits.
+- **Pure coordination, not a worker pool.** `Dwrr` decides which item is served next.
+  It does not start processes, run jobs or manage a pool of workers. The caller does
+  the work. `Dwrr.Server` is a serialized mailbox around one scheduler, not a pool.
 
 ## Apply and run the stage-2 kit (owner only)
 
@@ -50,4 +258,10 @@ holds output and `.loop/notes.*` discarded notes; `STOP` names an exhausted task
 Keep ignored logs for review; do not blindly rerun STOP. Preparation invokes no
 coder, stages/commits nothing, publishes nothing and changes no installed skill.
 
-Release README prose and examples remain the T24 task.
+## Colophon
+
+- Release: 0.1.0 (intended; not yet published). Hex package and application: `dwrr`.
+- Elixir >= 1.18 and OTP >= 27. No runtime dependencies.
+- License: MIT. Copyright 2026 M. Robert Martin.
+- Source: https://github.com/version2beta/dwrr-elixir
+- Intended Hex and HexDocs pages for `dwrr` are not published yet.
