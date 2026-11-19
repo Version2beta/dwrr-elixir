@@ -30,3 +30,6 @@ Remaining: Driver.run/0 is still the T20 stub (returns :ok without reading stdin
 T20: JSONL driver and strict protocol.
 Work done: implemented fully parsed request dispatch with threaded state, synchronous JSONL writes, EOF return, and category-only stderr plus exit 2 for protocol errors; MIX_ENV=test mix test test/stage1/20_driver_test.exs --warnings-as-errors --no-color -> Result: 4 passed (exit 0).
 Remaining: no issue observed in selected tests; full-suite and external conformance validation were not run in this attempt.
+T22: minimal caller-owned Dwrr.Server.
+Work: implemented GenServer initialization, serialized core operations with exact replies/state extraction, standard supervision and default calls; selected test command -> Result: 7 passed (exit 0); server formatted and git diff --check passed.
+Remaining: no issue observed in selected tests; full-suite validation was not run in this attempt.
