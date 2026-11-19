@@ -1,0 +1,5 @@
+{
+  "path": ".github/workflows/ci.yml",
+  "sha256": "e9db7e9196fd83ce6a8484c68a7d68ec632e5d10312efb693198592464f82a3a",
+  "provenance": "Owner-authorized complete ordinary YAML, minimum 1.18.4/27.3 and installed 1.20.4/29.1.2; pinned dwrr-spec 8a0e3cf9ae860ba207213590c00feeb822bdd8f2. setup-beam build-listing evidence and URLs: docs/STAGE2-VERIFICATION.md. Protected identity assurance, not a coder task; hosted CI unexecuted."
+}

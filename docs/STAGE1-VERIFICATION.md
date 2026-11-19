@@ -1,4 +1,11 @@
-# Stage 1 kit verification
+# Stage 1 kit verification (historical preparation record)
+
+**Current status note:** the owner subsequently completed stage 1 at `7205252`.
+This document preserves its original stub-preparation evidence, not current
+checkout status. Original loop/post-loop audit is in SPEC-LOOP-SHAKEDOWN.md §12;
+the current overlay and changed protection boundary are in STAGE2-VERIFICATION.md.
+The historical 52 protected hashes held through the original loop, not across
+legitimate stage-2 spec/docs/task/metadata overlays.
 
 ## Outcome and boundary
 
@@ -124,3 +131,13 @@ After the owner runs stage 1, retain `.loop/loop.log`, coder logs, notes and any
 STOP file. Review the baseline-to-result diff and all protected hashes, inspect
 for fixture special cases and judge bypasses, rerun acceptance, and ask for real
 use misfires before constructing stage 2. Exact start commands are in README.md.
+
+## Authorized stage-2 helper exception (current overlay)
+
+Historical unchanged-file claims above describe the original stage-1 preparation.
+The owner now authorizes only test/test_helper.exs to set assert_receive_timeout
+1000ms: 41 original frozen files remain untouched and one authorized helper change
+is recorded separately with original/new SHA256 in the protected
+test/fixtures/stage2-helper-overlay-sha256.json. The unchanged manifest excludes
+that helper rather than rewriting its original hash. All 66 historical tests still
+execute. See STAGE2-VERIFICATION.md for current final-snapshot evidence.

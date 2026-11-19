@@ -1,107 +1,53 @@
 # dwrr-elixir
 
-Stage-1 spec-loop kit for a pure Elixir deficit weighted round robin scheduler.
-**This checkout contains stubs, not a working release.** No loop has run.
+Stage-2 spec-loop kit over the completed stage-1 core. Release README/examples
+remain the T24 implementation target; this is not a published release.
 
-## Need and scope
+## Apply and run the stage-2 kit (owner only)
 
-Allocate a shared consumer's service by declared item cost and queue quantum,
-without coupling scheduling to execution or a process. Hex name `dwrr`, module
-`Dwrr`. Elixir >=1.18, OTP >=27; no runtime dependencies. Driver uses built-in JSON.
-Stage 1 covers the pure core and conformance driver; release docs, properties and
-minimal GenServer wrapper belong to stage 2.
+Already applied over audited stage-1 HEAD `7205252` on
+`spec-loop/stage2-preparation`. Review SPEC Part 2, tasks.json and
+[verification](docs/STAGE2-VERIFICATION.md) first. T01–T21 remain unchanged;
+the old T22 whole-tree gate was replaced by seven new tasks T22–T27 and T29.
+T28 is deliberately absent: CI is complete and protected, not a coding task.
+Properties, the naive oracle and CI identity check are protected preparation assets.
 
-## Apply and run this kit
-
-The kit is already applied in this directory on `spec-loop/framing`, with no
-commits created by preparation. Review `SPEC.md`, `tasks.json`, protected paths,
-and `docs/STAGE1-VERIFICATION.md` first. The reference is private, outside this
-checkout; it is not part of the kit or a source for the coder.
-
-Requirements: the installed Elixir **1.20.4 / OTP 29** for these exact ExUnit
-summary expectations, Python >=3.9, bash, git, jq, timeout (or gtimeout), and Pi
-with owner-authorized provider access/spending. The library's minimum is 1.18/27;
-this kit's judge summaries were verified with 1.20.4, not claimed portable to 1.18.
-The sibling `../dwrr-spec` must be at `8a0e3cf9ae860ba207213590c00feeb822bdd8f2`.
-No network/dependencies are needed for tests. `.wtha/` is globally ignored;
-`.loop/`, `_build/`, `deps/` are kit ignores.
-
-The owner, not the preparation assistant, runs these commands. They explicitly
-create a committed baseline and authorize the loop's model calls, commits and
-discard of **attempt-owned** work. Do not start with any unrelated edits. Set
-provider spending limits first; the loop is not a sandbox. Review the exact
-commands in `scripts/loop.sh`; this kit does not set or override them.
+Exact judge expectations require installed Elixir 1.20.4 / OTP29. Library minimum
+1.18/27 is not proven by that runtime. CI minimum/current jobs are not executed
+by preparation. Requires Python3, bash, git, jq, timeout (or gtimeout), Pi with
+owner-authorized access/spending, and approved StreamData test dependency.
+Do not start with unrelated edits. Only the owner may commit this baseline and
+then authorize model calls, loop commits and discards of attempt-owned edits.
 
 ```sh
 cd ~/Development/dwrr-elixir
 test "$(git -C ../dwrr-spec rev-parse HEAD)" = 8a0e3cf9ae860ba207213590c00feeb822bdd8f2
-git switch -c spec-loop/stage1
-# Review ALL files before including them in the baseline.
+test "$(git branch --show-current)" = spec-loop/stage2-preparation
+MIX_ENV=test mix deps.get --check-locked
 git status --short
+# Review all tracked AND new files; do not include .loop/ or private source.
 git add .
 git diff --cached --stat
-git commit -m "Add verified stage-1 spec-loop kit"
+git commit -m "Add verified stage-2 spec-loop kit"
 test -z "$(git status --porcelain)"
 mkdir -p .loop
 set -o pipefail
-JUDGE_TIMEOUT=300 bash scripts/loop.sh 2>&1 | tee .loop/stage1-console.log
+JUDGE_TIMEOUT=300 bash scripts/loop.sh 2>&1 | tee .loop/stage2-console.log
 ```
 
-The unchanged loop defaults are:
+Unchanged pinned defaults (inspection only; no kit overrides):
 
 ```text
-cheap:     pi --provider anthropic --model claude-haiku-5-5 --thinking high --print --no-session
-strong:    pi --provider openai-codex --model gpt-6.1-sol --thinking high --print --no-session
+cheap: pi --provider anthropic --model claude-haiku-5-5 --thinking high --print --no-session
+strong: pi --provider openai-codex --model gpt-6.1-sol --thinking high --print --no-session
 strongest: pi --provider openai-codex --model gpt-6.1-sol --thinking max --print --no-session
 ```
 
-They are shown for inspection, **not assigned by this kit**. Pre-existing owner
-environment overrides would change them; inspect/unset those yourself if needed.
-Default 60 iterations, four attempts per task, coder timeout 1200s, each judge
-command timeout 300s. Verified reference timings are in the verification report.
+Inspect any owner environment overrides yourself. Defaults: 60 iterations, four
+attempts per task, 1200s coder timeout, 300s per judge command. The loop commits
+on this branch. `.loop/loop.log` records exact coder commands, `.loop/coder.*.log`
+holds output and `.loop/notes.*` discarded notes; `STOP` names an exhausted task.
+Keep ignored logs for review; do not blindly rerun STOP. Preparation invokes no
+coder, stages/commits nothing, publishes nothing and changes no installed skill.
 
-The loop commits on your branch; `.loop/loop.log` records each exact coder
-command, `.loop/coder.*.log` holds output, `.loop/notes.*` retains failed notes,
-and `STOP` names an exhausted task. Keep `.loop/` for review and shakedown timing;
-it is ignored and must not be committed. Do not blindly rerun after STOP.
-Return for stage-1 review before proceeding to stage 2. We will inspect all code
-for test-specific shortcuts and check that every protected file stayed unchanged.
-
-## API at a glance (after implementation)
-
-```elixir
-s = Dwrr.new(2)
-{:ok, s} = Dwrr.set_quantum(s, 0, 2)
-{:ok, s} = Dwrr.enqueue(s, 0, [%Dwrr.Item{value: :job, cost: 2}])
-{:ok, [%Dwrr.Scheduled{queue: 0, value: :job, cost: 2}], s} = Dwrr.take(s, 1)
-```
-
-Other return shapes: `add_queue(s)` is `{index, s2}`; `remove_queue(s)` is `s2`.
-`remove_head`/`drain_queue` return `{:ok, value, s2}`. Tagged errors omit state;
-keep the original scheduler. Type faults raise ArgumentError. Thread successful
-returned states; this core neither executes work nor coordinates callers.
-
-## Check it yourself
-
-After the loop (not a claim about these stubs):
-
-```sh
-bash scripts/loop.sh --check
-mix format --check-formatted
-MIX_ENV=test mix compile --warnings-as-errors
-MIX_ENV=test mix test --warnings-as-errors --no-color
-python3 ../dwrr-spec/tools/replay.py --driver 'env MIX_ENV=test mix run --no-compile --no-start scripts/conformance_driver.exs'
-python3 ../dwrr-spec/tools/check_driver.py --driver 'env MIX_ENV=test mix run --no-compile --no-start scripts/conformance_driver.exs'
-```
-
-Native tests exercise all seven vendored corpus files directly through Dwrr,
-without the driver adapter. Original cases and hashes are in
-`test/fixtures/dwrr-spec/PROVENANCE.json`. The independent external tools check
-all recorded responses plus strict protocol, interactive flushing and exit codes.
-The shared source is a draft spec 0.1.1; passing this corpus is not a proof of all
-possible sequences or a substitute for stage-2 differential properties.
-
-## Colophon
-
-MIT. Copyright (c) 2026 M. Robert Martin. Repository intended for
-https://github.com/Version2beta/dwrr-elixir. No publication, push or tag in this run.
+Release README prose and examples remain the T24 task.

@@ -1,0 +1,6 @@
+{
+  "path": "test/test_helper.exs",
+  "original_sha256": "3a799aed7ff92bb3d65f4e39b41270cfc5f9a2c569d026ab810460ad98ac8c28",
+  "sha256": "a343d30019609abef5a18d0a792319c1e43d6601165a847b76e5b3e63c674379",
+  "authorization": "Owner-authorized helper-only stage-2 overlay: assert_receive_timeout 1000ms. The original SHA remains provenance, not an unchanged claim."
+}

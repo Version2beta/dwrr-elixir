@@ -1,13 +1,21 @@
-# dwrr-elixir — approved specification draft; stage-1 kit verified
+# dwrr-elixir — approved specification draft; stage-2 kit prepared
 
-**Status: APPROVED; owner authorized stage-1 preparation after skill fixes.**
-The current binding stage-1 contract is `../SPEC.md`; preparation/verification results are in [STAGE1-VERIFICATION.md](STAGE1-VERIFICATION.md). No coder loop, model call, staging or commit was authorized or performed by preparation. The owner runs the loop. Skill 1.1 plus follow-up fixes was re-read; its loop is copied unchanged with pinned model defaults, post-format judging, exact stdout expectations and judge timeouts. Shared SPEC/PROTOCOL 0.1.1 at `8a0e3cf9ae860ba207213590c00feeb822bdd8f2` now includes the agreed strict protocol rules and `check_driver.py`. Input history is in [SPEC-LOOP-SHAKEDOWN.md](SPEC-LOOP-SHAKEDOWN.md).
+**Current status:** owner stage-1 loop completed at audited HEAD `7205252`;
+local stage-2 preparation is authorized, not a stage-2 coder/model loop. Binding
+stage-2 contracts are numbered Part 2 of `../SPEC.md`. See
+[STAGE2-VERIFICATION.md](STAGE2-VERIFICATION.md) for current executed evidence
+and [SPEC-LOOP-SHAKEDOWN.md](SPEC-LOOP-SHAKEDOWN.md) §12–13 for the original
+owner loop versus this delegated preparation. Historical stage-1 framing and
+preparation claims below describe their original phase, not current status.
+No commits, staging, remote actions, publication or installed-skill edits are
+authorized in this preparation. Repository/package names and Server details are
+now settled (§16); no design decision remains open for this kit.
 
 ## 1. Approved framing
 
 **Target/outcome:** Elixir application authors sharing one consumer among producers get a pure, cost-aware FIFO scheduler that allocates service by queue weight and conforms exactly to dwrr specification 0.1.1.
 
-Name/repository: `dwrr-elixir`; Mix application `:dwrr`, module `Dwrr`, initial release `0.1.0`. Confirm owner-controlled package/repository URLs before publication. This is a library with a small deterministic conformance-driver executable, not the skill's usual standalone CLI product.
+Name/repository: `dwrr-elixir`; Mix application `:dwrr`, module `Dwrr`, initial release `0.1.0`. Approved repository https://github.com/version2beta/dwrr-elixir and Hex name dwrr; publication still requires owner control/authority verification. This is a library with a small deterministic conformance-driver executable, not the skill's usual standalone CLI product.
 
 ### Goals
 
@@ -152,7 +160,7 @@ python3 ../dwrr-spec/tools/replay.py --driver 'env MIX_ENV=test mix run --no-com
 python3 ../dwrr-spec/tools/check_driver.py --driver 'env MIX_ENV=test mix run --no-compile --no-start scripts/conformance_driver.exs'
 ```
 
-`../dwrr-spec` denotes the sibling pinned checkout at `8a0e3cf9ae860ba207213590c00feeb822bdd8f2`. CI must fetch/locate that exact revision explicitly, not silently use main or a mutable tag. The replay command starts one driver process and uses upstream corpus by default. Both tool commands have passed on the private reference, not on the delivered stubs. Build first so compilation messages cannot contaminate stdout. A future CI path can place pinned dwrr-spec at the same sibling path.
+`../dwrr-spec` denotes the sibling pinned checkout at `8a0e3cf9ae860ba207213590c00feeb822bdd8f2`. CI must fetch/locate that exact revision explicitly, not silently use main or a mutable tag. The replay command starts one driver process and uses upstream corpus by default. Both tool commands have passed on the private reference, not on the delivered stubs. Build first so compilation messages cannot contaminate stdout. The complete protected CI places pinned dwrr-spec at the same sibling path.
 
 ### Required protocol behavior
 
@@ -182,7 +190,7 @@ After any formatting write, rerun the exact judge on the resulting code; a pre-f
 
 ## 8. Approved two-stage build order
 
-Stage 1 is now realized as 22 tasks in `../tasks.json`; stage 2 remains a 25-task plan. All 22 stage-1 tasks passed on the private reference under loop --check and failed on delivered stubs. Every task has nonempty exact stdout expectations; no legacy pass_marker is used. Whole-tree must remain last. Tests, fixtures, contracts, driver seams, and judge glue may be protected complete files; don't create fake coding tasks for already-complete artifacts.
+Stage 1 was realized as 22 tasks. Current tasks.json retains T01–T21 and replaces the old final T22 with seven NEW stage-2 tasks T22–T27 and T29 (deliberate T28 gap: CI is complete/protected); the owner explicitly approved this exception to the 15-task minimum. All 22 stage-1 tasks passed on the private reference under loop --check and failed on delivered stubs. Every task has nonempty exact stdout expectations; no legacy pass_marker is used. Whole-tree must remain last. Tests, fixtures, contracts, driver seams, and judge glue may be protected complete files; don't create fake coding tasks for already-complete artifacts.
 
 ### Stage 1 — usable pure scheduler and exact conformance (22 tasks)
 
@@ -211,35 +219,27 @@ Stage 1 is now realized as 22 tasks in `../tasks.json`; stage 2 remains a 25-tas
 
 Stage 1's deliverable is a usable pure library with the approved API and reproducible conformance driver, not only a test scaffold.
 
-### Stage 2 — independent assurance, minimal process wrapper, release readiness (25 tasks)
+### Stage 2 — seven current cohesive tasks, not 25 artificial slices
 
-1. Independent naive reference, reviewed directly against SPEC §5.
-2. StreamData small valid operation-sequence differential properties.
-3. Invalid inputs/error precedence/state-preservation sequence properties.
-4. Split-versus-bulk take and paused-visit properties.
-5. FIFO/value/cost conservation under enqueue, take, removal and drain.
-6. Reweight/backlog fairness and nonstarvation regressions.
-7. Near-limit large-quantum differential properties with bounded naive work.
-8. Peak-credit and numeric-boundary targeted generated cases.
-9. Huge-skip analytic regressions, nonzero cursor/ties and bounded performance probes.
-10. Deterministic shrinking/replay diagnostics and invariant checks.
-11. Immutability branching and arbitrary opaque-value examples/tests.
-12. Minimal `Dwrr.Server.start_link` initialization, explicit ownership and no implicit children.
-13. Server one-call delegation, operation-specific state extraction and unchanged core replies including scheduler.
-14. Server concurrent-call serialization, caller-owned supervision and termination tests.
-15. Server default GenServer timeout/failure/no-retry semantics and docs.
-16. Public module docs, opaque/data/result/error typespecs and executable examples.
-17. README need, at-a-glance metadata, installation and quick-start example.
-18. README examples: byte-weighted sharing, caller-owned worker orchestration, withdrawing work.
-19. README behavior, concurrency/immutability, correctness, comparisons and colophon.
-20. TESTING.md with test inventory, bounded properties, replay and safe mutation-check instructions.
-21. CHANGELOG.md initial **0.1.0**, not Go's version history.
-22. RELEASING.md Elixir/Hex procedure with owner-controlled credentials/tags/publication.
-23. Mix package metadata, MIT LICENSE copyright **2026 M. Robert Martin**, version/spec claims and runtime-dependency audit.
-24. CI minimum/current compatible Elixir+OTP tests, formatting/warnings-as-errors and pinned external replay; preserve stage-1 tasks and provenance.
-25. FINAL whole-tree: formatting, compile warnings-as-errors, full suite including all stage-1 corpus units/properties/Server if retained, external replay PASS; docs and protected-path review.
+Protected complete preparation assets: independent list-based bounded naive
+reference, eight StreamData properties, three oracle anchor tests, provenance and
+public executable-AST guards, authorized helper-overlay hash and complete CI
+with one byte-identity test. These are not implementation tasks.
 
-Cut Server tasks 12–15 **first** if stage 2 exceeds budget; do not expand its scope. Otherwise retain the 25-task plan. Any resulting task-count revision must preserve a usable endpoint and final whole-tree gate, with actual task count 15–40.
+1. T22 minimal Server initialization, all operations, serialization and failures.
+2. T23 public documentation/typespecs/executable examples, frozen executable AST.
+3. T24 README structure, meaningful executable examples and exact owner commands.
+4. T25 TESTING inventory, bounded domains, diagnostics and reproduction.
+5. T26 CHANGELOG initial0.1.0 plus owner-controlled RELEASING procedure.
+6. T27 Mix identity/metadata, exact package manifest and no runtime dependency.
+7. T29 final whole tree, 97 checks including eight properties, both external tools.
+
+T28 is deliberately absent. Complete protected ordinary YAML CI targets
+1.18.4/27.3 and 1.20.4/29.1.2, pinned sibling replay AND protocol checker.
+setup-beam listings are verified; minimum runtime and hosted CI remain unexecuted.
+
+Every new task fails delivered stubs and passes private reference under unchanged
+loop --check; earlier task commands/counts remain unchanged. See current evidence.
 
 ## 9. Minimal Server (stage 2; first budget cut)
 
@@ -258,7 +258,7 @@ The driver and Server must store state according to the differing core shapes, n
 
 The driver's separate wire translation uses the same state-extraction rules, including replacing its state on `new`; it does not expose core scheduler structs on the wire. Server replies are deliberately **not** stripped of scheduler state. No snapshot API is needed just to access an already-returned immutable value.
 
-Concurrent calls serialize in mailbox arrival order, not promised order across senders. A timeout does not prove the operation was not applied: no retries or idempotence guarantee. No task execution, wakeups, backpressure or persistence. Supervision is caller-owned; no implicit global scheduler. Exact `start_link` argument/options shape, initialization/restart configuration and treatment of outside-domain exceptions crossing the process boundary remain narrow documentation/API details to settle before wrapper tests; do not add a second validation/error-code scheme.
+Concurrent calls serialize in mailbox arrival order, not promised order across senders. A timeout does not prove the operation was not applied: no retries or idempotence guarantee. No task execution, wakeups, backpressure or persistence. Supervision is caller-owned; no implicit global scheduler. `start_link(count, options \\ [])` forwards standard GenServer options. Caller-owned restart starts fresh from original count; core outside-domain exceptions terminate Server and caller sees call exit. Default GenServer timeouts/no retry; no new validation/error scheme. These details are approved, not open.
 
 ## 10. README/documentation and release requirements
 
@@ -304,15 +304,36 @@ No change to `/Users/rob/Development/dwrr-spec` is made here. The owner's upstre
 
 Item and Scheduled are structs. Outside documented Elixir types/shapes raise `ArgumentError` via guards plus explicit raising fallbacks; no added shared error codes.
 
-## 15. Decision record and remaining details
+## 15. Decision record
 
-Approved: target/library framing and 0.1.0 naming; operation-specific returns and structs; tagged index/take errors; outside-type `ArgumentError`; map queue records, `:queue`, ordered nonempty set; full-unproductive-cycle-only skipping and local accounting; Elixir >=1.18/OTP >=27 built-in JSON with no Jason; protocol-first validation, blank-line failure, ignored extra fields and canonical decimal grammar; pinned corpus `8a0e3cf9ae860ba207213590c00feeb822bdd8f2` (`8a0e3cf`, spec 0.1.1); 22-task stage 1 and 25-task stage 2 with minimal Server as first budget cut. These decisions are not open alternatives.
+Stage-1 approvals are preserved above. Stage-1 loop and post-loop audits are now
+complete. Historical 25-task stage-2 slicing is superseded by the owner-approved
+seven-task plan in §8 and binding SPEC Part 2 (historical eight-task preparation
+was superseded when complete protected CI ceased to be a coder task). No protected test becomes a fake
+coding task merely to meet a count. Core and driver implementation remain unchanged.
 
-Remaining narrow details, without reopening approvals:
+## 16. Stage-2 approval and evidence boundary
 
-- Protocol 0.1.1 resolves negative count as exit-2 protocol error. Driver adds no arbitrary integer/line caps; duplicate keys remain unspecified.
-- Minimal Server exact start_link argument/options shape, initialization/restart configuration and exception behavior across its process boundary (§9), not whether to strip core replies or add retries.
-- Owner-controlled repository/package URLs; future minimum/current CI compatibility, exact test-only dependency lock, protected invariant seam and non-vacuous task realization require verification, not invented current success.
-- Stage-1 upstream alignment is verified by both external tools on the reference. No source repository was edited. Actual loop-written implementation, model access/spending and stage-2 overlay remain unverified.
+Approved: Server start_link(count, options \\ []) with forwarded standard options,
+caller-owned supervision/fresh restart from count, exact core replies including
+state, operation-shaped state extraction, default calls/timeouts/no retry,
+terminate-on-outside-domain exception. No implicit child, persistence, execution
+or backpressure. Release0.1.0, Hex dwrr/app dwrr, canonical repository
+https://github.com/version2beta/dwrr-elixir; MIT2026 M. Robert Martin.
 
-**Owner-run gate:** review the verified stub kit, commit its baseline yourself, then run on a branch using README commands. Preparation has run no coder loop, invoked no other model, staged nothing and committed nothing.
+Approved dependency resolved: StreamData ~>1.3.0, locked1.3.0 only:test,
+runtime:false; no runtime/documentation dependencies. No dependency updates by
+coder. Writable lib/dwrr.ex is docs/@spec only, frozen rest-of-AST; source structs,
+core/driver/parser and 41 original files remain unchanged/hash-guarded. The sole
+authorized helper-only change sets assert_receive_timeout 1000ms; its original
+SHA provenance and new protected overlay SHA are recorded separately. README,
+release docs and Mix metadata are writable targets; CI is complete/protected.
+
+Preparation is sole-writer delegated implementation work under explicit owner
+authority, not the original stage-1 owner's model loop. Private Server/docs
+implementation is outside the kit; delivered Server/docs/metadata remain stubs.
+CI is identical, complete and protected in both trees. Only
+installed Elixir1.20.4/OTP29 executed. Minimum1.18/27 and hosted CI remain unrun;
+no runtime-install/Docker/model/provider inference or publication was done.
+See STAGE2-VERIFICATION.md for exact stub/reference/mutation/package evidence.
+Owner reviews and commits baseline before separately authorizing the stage-2 loop.

@@ -4,16 +4,16 @@
   "check": "MIX_ENV=test mix compile --warnings-as-errors",
   "protected": [
     "^test/",
-    "^conformance/parser\\.ex$",
-    "^lib/dwrr\\.ex$",
+    "^conformance/",
+    "^lib/dwrr/core\\.ex$",
     "^lib/dwrr/(item|scheduled)\\.ex$",
-    "^mix\\.exs$",
+    "^mix\\.lock$",
     "^\\.formatter\\.exs$",
     "^\\.gitignore$",
     "^scripts/",
     "^docs/",
-    "^README\\.md$",
-    "^LICENSE$"
+    "^LICENSE$",
+    "^\\.github/workflows/ci\\.yml$"
   ],
   "tasks": [
     {
@@ -208,10 +208,64 @@
     },
     {
       "id": "T22",
+      "title": "Minimal Server: initialization, operations, serialization and failures",
+      "test": "MIX_ENV=test mix test test/stage2/01_server_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 7 passed$"
+      ],
+      "tier": "hard"
+    },
+    {
+      "id": "T23",
+      "title": "Public docs, operation typespecs and executable examples",
+      "test": "MIX_ENV=test mix test test/stage2/02_public_docs_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 3 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T24",
+      "title": "README: usable examples, contracts and owner instructions",
+      "test": "MIX_ENV=test mix test test/stage2/03_readme_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 2 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T25",
+      "title": "TESTING: bounded properties, diagnostics and reproduction",
+      "test": "MIX_ENV=test mix test test/stage2/04_testing_docs_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 2 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T26",
+      "title": "CHANGELOG and owner-controlled RELEASING",
+      "test": "MIX_ENV=test mix test test/stage2/05_release_docs_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 2 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T27",
+      "title": "Mix metadata and exact package manifest",
+      "test": "MIX_ENV=test mix test test/stage2/06_metadata_test.exs --warnings-as-errors --no-color",
+      "expect": [
+        "^Result: 3 passed$"
+      ],
+      "tier": "normal"
+    },
+    {
+      "id": "T29",
       "title": "Whole tree: formatted, warnings-as-errors, all tests, both conformance tools",
       "test": "mix format --check-formatted && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test --warnings-as-errors --no-color && python3 ../dwrr-spec/tools/replay.py --driver 'env MIX_ENV=test mix run --no-compile --no-start scripts/conformance_driver.exs' && python3 ../dwrr-spec/tools/check_driver.py --driver 'env MIX_ENV=test mix run --no-compile --no-start scripts/conformance_driver.exs'",
       "expect": [
-        "^Result: 66 passed$",
+        "^Result: 97 passed \\(8 properties, 89 tests\\)$",
         "^PASS: 1839 cases, 44728 steps, 7 files$",
         "^PASS: 36 of 36 checks passed$"
       ],

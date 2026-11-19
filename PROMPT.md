@@ -1,28 +1,24 @@
-# Stage 1 coder instructions (complete; do not change)
+# Stage-2 coder instructions (complete; do not change)
 
-Implement exactly the selected task from SPEC.md and PROGRESS.md. Keep public
-names, return shapes, guards/fallback guarantees and contracts. Read the relevant
-vendored shared spec. Code already passing stays unless this task requires it.
+Implement only the selected task from SPEC Part 2 and PROGRESS.md. All stage-1
+behavior and provenance remain frozen, except the owner-authorized helper-only
+assert_receive_timeout overlay recorded in test/fixtures/stage2-helper-overlay-sha256.json. Keep already passing code unchanged.
 
-Only lib/dwrr/core.ex, conformance/adapter.ex and conformance/driver.ex are initial
-implementation stubs. New implementation-only helper files are allowed. All files
-marked complete and all protected paths in tasks.json are immutable. Never edit
-tests, corpus/provenance, public delegates/types, parser, build setup, specs,
-README, task list, loop or validation scripts. Never print fake test PASS lines,
-exit the test VM, detect tests/fixtures, or special-case corpus values. Never
-invoke a model, use the network, add dependencies, commit, stage or mark tasks done.
+Writable targets: lib/dwrr/server.ex; lib/dwrr.ex @doc/@moduledoc/@spec ONLY (its
+remaining AST is frozen); README.md; TESTING.md; CHANGELOG.md; RELEASING.md;
+mix.exs metadata (preserve paths/approved dependency);
+PROGRESS.md attempt notes. Never edit core, conformance, structs, tests/support,
+fixtures, docs/, scripts, lock, formatter, ignore, license, spec/tasks/prompt/loop
+or other complete/protected files, including complete .github/workflows/ci.yml. New helpers only if the selected target needs
+one. Tests and the naive reference are finished preparation assets, not tasks.
 
-Run the selected task command; add three lines to PROGRESS.md: task id, work done,
-remaining issue. Stop. The loop judges and commits; failures discard attempt-owned
-changes but retain additions to notes outside Git. No runtime files or global state.
+No fixture special cases, output-marker tricks, VM exits, test detection or
+expected-answer literals in examples. No model/network calls, new dependencies,
+publication, credentials, staging, commits, tags, remote actions or skill edits.
+Server is minimal: exact core replies including state, correct shape extraction,
+caller-owned supervision, fresh restart, default calls/timeouts, no catches/retries
+or execution/backpressure. Pure docs/types must not alter implementation.
 
-Use map queue records, :queue FIFO, cached head, ordered :gb_sets busy indexes.
-The exact struct and internal record seam is in SPEC.md. No list/sort over N
-empty queues in take. Skip arithmetic only after B consecutive failed busy visits
-since the last item served, including safe resumed-visit accounting. Big integers
-do not relax MAX_COST/MAX_QUANTUM. Type faults raise ArgumentError explicitly;
-shared domain errors are atoms and preserve original state. The driver parses all
-protocol fields before any scheduler validation, flushes every response and uses
-exit 2 for protocol failures with no payload disclosure.
-
-No Dwrr.Server, property model, StreamData or release work in this stage.
+Run the selected task command, append three lines to PROGRESS.md (task id, work,
+remaining issue) and stop. The owner-authorized loop judges and commits or discards
+attempt-owned edits; you do not mark tasks done or commit yourself.

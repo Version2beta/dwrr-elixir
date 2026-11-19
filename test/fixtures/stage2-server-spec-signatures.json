@@ -1,0 +1,10 @@
+[
+  "start_link(non_neg_integer(), GenServer.options()) :: GenServer.on_start()",
+  "enqueue(GenServer.server(), integer(), [%Dwrr.Item{cost: non_neg_integer(), value: term()}]) :: {:ok, Dwrr.t(term())} | {:error, Dwrr.error()}",
+  "take(GenServer.server(), integer()) :: {:ok, [Dwrr.Scheduled.t(term())], Dwrr.t(term())} | {:error, Dwrr.error()}",
+  "set_quantum(GenServer.server(), integer(), non_neg_integer()) :: {:ok, Dwrr.t(term())} | {:error, Dwrr.error()}",
+  "add_queue(GenServer.server()) :: {non_neg_integer(), Dwrr.t(term())}",
+  "remove_queue(GenServer.server()) :: Dwrr.t(term())",
+  "remove_head(GenServer.server(), integer()) :: {:ok, Dwrr.Item.t(term()) | nil, Dwrr.t(term())} | {:error, Dwrr.error()}",
+  "drain_queue(GenServer.server(), integer()) :: {:ok, [Dwrr.Item.t(term())], Dwrr.t(term())} | {:error, Dwrr.error()}"
+]

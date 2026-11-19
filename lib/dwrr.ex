@@ -1,4 +1,4 @@
-# Complete; do not change.
+# Stage-2 documentation/typespec target. Executable AST and opaque representation are frozen.
 defmodule Dwrr do
   @moduledoc """
   Pure deficit weighted round robin. Thread successful returned schedulers;

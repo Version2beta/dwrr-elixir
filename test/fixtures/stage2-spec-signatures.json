@@ -1,0 +1,10 @@
+[
+  "new(non_neg_integer()) :: t(term())",
+  "enqueue(t(value), integer(), [%Dwrr.Item{cost: non_neg_integer(), value: value}]) :: {:ok, t(value)} | {:error, error()}\n        when value: term()",
+  "take(t(value), integer()) ::\n          {:ok, [Dwrr.Scheduled.t(value)], t(value)} | {:error, error()}\n        when value: term()",
+  "set_quantum(t(value), integer(), non_neg_integer()) :: {:ok, t(value)} | {:error, error()}\n        when value: term()",
+  "add_queue(t(value)) :: {non_neg_integer(), t(value)} when value: term()",
+  "remove_queue(t(value)) :: t(value) when value: term()",
+  "remove_head(t(value), integer()) ::\n          {:ok, Dwrr.Item.t(value) | nil, t(value)} | {:error, error()}\n        when value: term()",
+  "drain_queue(t(value), integer()) ::\n          {:ok, [Dwrr.Item.t(value)], t(value)} | {:error, error()}\n        when value: term()"
+]

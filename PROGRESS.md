@@ -1,6 +1,11 @@
-# Stage 1 progress
+# Stage 2 preparation / historical stage-1 progress
 
-No loop has run. Append three short lines per attempt; the loop owns judgments.
+Stage 1 owner loop completed at 7205252 in eight first-pass iterations. Historical
+notes below are preserved verbatim; their task-local "remaining" statements are
+not current status. Stage-2 preparation now adds protected assurance assets and seven
+new failing stub tasks T22–T27 and T29. T28 was removed: CI is complete/protected. No stage-2 coder/model loop has run. See
+docs/STAGE2-VERIFICATION.md for actual preparation checks. Append three short
+lines per future attempt; the loop owns judgments.
 T01: implemented Dwrr.Core.new/1 with guarded nonnegative-integer clause (builds count map records quantum 1, credit 0, :queue tail; busy :gb_sets.empty()) and ArgumentError fallback.
 T01 test: MIX_ENV=test mix test test/stage1/01_constructor_test.exs --warnings-as-errors --no-color -> Result: 3 passed (exit 0).
 Remaining: other Dwrr.Core functions are still stubs (T02+); no format/compile-wide or other-stage validation run.

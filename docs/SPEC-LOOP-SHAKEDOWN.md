@@ -1,6 +1,12 @@
 # Spec-loop shakedown — preparation evidence ledger
 
-**Current status: stage-1 stub kit verified; owner loop not run.** See §11 and [STAGE1-VERIFICATION.md](STAGE1-VERIFICATION.md) for current evidence. Sections 1–10 preserve the historical framing/draft phase (including its then-open decisions and then-unfixed skill findings); they are not current status. No coder/model calls or commits in stage-1 preparation. See [SPEC-DRAFT.md](SPEC-DRAFT.md) for approved decisions.
+**Current status: stage 1 owner loop completed and reviewed; stage-2 stub overlay
+prepared and verified locally.** See §12 for the original owner loop, §13 and
+[STAGE2-VERIFICATION.md](STAGE2-VERIFICATION.md) for this authorized delegated
+preparation. Sections 1–11 preserve historical phases and their then-current
+status/decisions; they are not claims about today's checkout. No stage-2 coder or
+model loop, staging, commit, publication or installed-skill edits in preparation.
+See [SPEC-DRAFT.md](SPEC-DRAFT.md) and binding SPEC Part 2 for current approvals.
 
 ## 1. Authority, target and preserved files
 
@@ -252,3 +258,170 @@ assignment example conflicts with the owner-only/no-kit-overrides rule; prefer
 plain loop invocation plus a documented, owner-controlled override explanation.
 Exact skip-trigger proof still needs review against the eventual loop code;
 behavior and reduction bounds alone do not prove internal trigger placement.
+
+## 12. Original stage-1 owner loop and post-loop review
+
+This section records the parent-provided independent read-only audit, not a new
+execution of historical snapshots by this preparer. Audit artifact:
+`/Users/rob/.pi/agent/sessions/--Users-rob-Development-dwrr-elixir--/subagent-artifacts/aeaa3bca-b0dd-485a-bb52-8a8d50fe2310_worker_output.md`.
+The parent separately inspected source: no fixture special cases, dynamic atoms
+or hidden shared state; the exact failed-busy-visit skip proof was checked at
+core.ex lines186–281 (at audited HEAD). This is source-inspection evidence, not
+an inference from task titles or a universal correctness proof.
+
+The owner ran kit `e3d229e547663d93498aaf7466962e75b986919b` to
+`7205252eb23a27a817fbc8795776ef58013de090`: **eight iterations, eight successful
+first attempts, zero observed retries**. Targets T01,T02,T03,T05,T07,T15,T19,T20.
+Six exact commands in loop logs and commit trailers:
+`pi --provider anthropic --model claude-haiku-5-5 --thinking high --print --no-session`;
+T15/T20 used
+`pi --provider openai-codex --model gpt-6.1-sol --thinking high --print --no-session`.
+No strongest/max attempt. These record commands requested, not backend telemetry,
+token counts, billing or independent model/effort verification.
+
+The stage-specific console file birth-to-mtime span was 626.108640 seconds,
+**approximately 10m26.1s**, 2026-11-12 12:47:32–12:57:58 −07:00. Filesystem span,
+not instrumented subprocess/run timing; cumulative loop.log contained earlier
+stub-check failures and must not supply the run's start time. Eight coder-log
+spans total481.297s, also not measured process durations.
+
+All **52 protected hashes held through all eight original loop commits**. Four
+implementation/progress files changed, not tests/contracts. The independent fresh
+build passed 66 tests, native all-seven corpus, external1839 cases/44728 steps/7
+files and36/36 protocol checks. Its disposable affordability `<`→`<=` mutation
+failed6/7 native corpus tests (all four small) and replay46/1839 cases; restoring
+bytes passed whole tree. Those are the parent's audit results; current overlay
+mutation and checks are separately recorded in §13. Stage2 legitimately changes
+some former protected docs/specs/tasks/metadata, so the original52 cannot be
+claimed intact across this overlay. Stage1 implementation/test/provenance hashes
+are newly pinned and preserved by the overlay.
+
+### All fourteen incidental completions (execution-backed historical matrix)
+
+“Own command” includes exit0 and all stdout expectations. “Full judge” additionally
+requires all predecessors, format and compile checks at the same snapshot.
+The audit executed all22 exact commands across nine snapshots (198 commands,
+104passes/94failures), plus18 format/compile checks; it did not run a coder or
+loop to reconstruct history.
+
+| Untargeted task | First own command pass | First full judge pass |
+|---|---|---|
+| T04 atomic enqueue | c345478 (T02) | 6ac75ed |
+| T06 append queues | c345478 (T02) | 329792f |
+| T08 remove head | 329792f (T05) | 2f59cad |
+| T09 drain | 329792f (T05) | 2f59cad |
+| T10 basic take | c345478 (T02) | 2f59cad |
+| T11 take edges | c345478 (T02) | 2f59cad |
+| T12 paused visits | 6ac75ed (T03) | 2f59cad |
+| T13 mid-visit mutations | 329792f (T05) | 2f59cad |
+| T14 idle-cycle/work bound tests | 6ac75ed (T03) | 2f59cad |
+| T16 sparse/FIFO | 2f59cad (T07) | 4410c38 |
+| T17 small corpus | 4410c38 (T15) | 4410c38 |
+| T18 random corpus | 2f59cad (T07) | 4410c38 |
+| T21 integration/replay | 7205252 (T20) | 7205252 |
+| T22 original whole tree | 7205252 (T20) | 7205252 |
+
+**Slicing lesson:** T14 and T18 own commands pass before idle skipping exists;
+task-title success does not establish that optimization. T15 remained the failing
+predecessor. Small implementation tasks often complete related later contracts;
+record this empirically instead of padding a task minimum or crediting22 coder
+iterations. The initial stage2 preparation used eight cohesive tasks; current stage2 uses
+seven, T22–T27 and T29, with CI complete/protected and T28 absent. Finished
+properties/reference are protected preparation work, not artificial coder tasks.
+
+## 13. Historical initial eight-task stage-2 preparation and skill feedback
+
+This section records the initial preparation, superseded for current task counts,
+CI protection and helper governance by §14 and STAGE2-VERIFICATION.md.
+
+The user expressly authorized a sole repository writer (delegated worker), local
+checks, a test-only StreamData download and this ledger update. That differs from
+§11's original no-subagent preparation and from §12's owner-run model loop. This
+phase invokes no coder/model loop, provider inference, staging, commits, pushes,
+remote collaboration mutations, publication or installed-skill changes. A local
+`spec-loop/stage2-preparation` branch was created from7205252; audited core and
+driver code remain byte-identical. All new tasks remain stubs in the delivered
+kit; private completed Server/docs/CI prove reachability outside it.
+
+Current results/commands/hashes/timings are in STAGE2-VERIFICATION.md and ignored
+`.loop/verification-stage2/`. The actual overlay passes all earlier21 tasks;
+every new T22–T29 fails its own unchanged loop judge for missing implementation.
+A completed private reference run passed all29 via unchanged loop --check.
+After exact typespec-test strengthening, final stdout again shows all29 pass;
+that final wrapper's exit record was lost to session timeout and is explicitly
+unknown (no orphan remained). A separately recorded latest whole-tree command
+exits0. Full recovery disposition is in STAGE2-VERIFICATION.md. The fresh
+whole tree passes98 checks (8properties/90tests), replay and protocol checker.
+The disposable actual-core-copy mutation fails6/7 corpus tests and replay46cases;
+restore passes full final gate and owned mutation directory is deleted.
+StreamData1.3.0 is approved, locked, test-only/runtime:false; no runtime dependency.
+
+Preparation initially caught a real installed-runner issue: new support filenames
+were not matched by Mix1.20's loader/ignore filters, so98 executed passes still
+exited nonzero under warnings-as-errors. Renaming NEW support files to documented
+`*_helper.exs` convention fixed it without disabling warnings, adding minimum-
+specific config or modifying historical support/tests. Earlier fixture/test wiring
+mistakes were fixed before final evidence, not used to weaken contracts. Delivered
+Server stubs also generate newer compiler unreachable-pattern warnings, but seven
+actual behavior tests fail; this is not formatting/warning-only stub proof.
+
+Minimum Elixir1.18/OTP27 not available/executed; no toolchain installation or
+Docker downloads. CI structure/commands are checked locally, **hosted CI is not
+run**. No new claim of authentication, model availability, cost, publication or
+full correctness beyond exercised evidence. Parent independent review remains a
+gate, especially the naive reference and test strength.
+
+Suggested skill improvements (feedback only; installed files unchanged):
+
+- Timestamp run start/end and record actual attempt/process durations.
+- Distinguish logs per run; cumulative logs may include earlier stub checks.
+- Record incidental task completion separately from targeted attempts and full
+  predecessor judgments; titles are not algorithm-proof coverage.
+- Permit honest smaller cohesive stages by explicit exception, not padded tasks
+  for complete preparation assets.
+- Replace README's model-command override assignment example with plain loop
+  invocation plus owner-controlled override explanation.
+
+## 14. Current authorized bounded precommit corrections
+
+The initial eight-task preparation in §13 is historical. Current stage 2 has
+seven new tasks T22–T27 and T29, deliberately no T28: ordinary YAML CI is complete
+and protected, identical in actual/reference, with one independent SHA256 test.
+T01–T21 commands/tiers/counts are unchanged; final suite is 97 checks (8 properties,
+89 tests), 28 total tasks. Delivered Server/docs/metadata remain stubs.
+
+The fake-process timeout test now waits on a fresh-reference barrier ack before
+mailbox inspection; selective receive preserves the single seen marker and any
+retry calls. There is no sleep or elapsed upper bound; module timeout catches
+hangs. Owner authorized assert_receive_timeout 1000ms in the stage-1 helper:
+41 original frozen files untouched plus one explicitly hashed helper overlay,
+retaining original hash provenance. Historical 66 tests still run.
+
+Private reference and entire isolation audit/quarantine were moved, with full
+pre/post byte identities, to /Users/rob/Development/dwrr-elixir-private/reference/
+and /Users/rob/Development/dwrr-elixir-private/isolation-audit/. New scripts/logs
+are external under /Users/rob/Development/dwrr-elixir-private/evidence/. These
+requested locators are deliberate; outside-tree is not an OS sandbox. Historical
+artifacts are preserved intact and older scripts can name removed temp paths.
+
+setup-beam v1 source and authoritative Hex build listings were fetched read-only
+(HTTP200); exact 1.18.4-otp-27 / OTP27.3 and 1.20.4-otp-29 / OTP29.1.2 exist
+for amd64 Ubuntu24.04 and26.04. CI uses those pairs and pinned spec8a0e3cf.
+This is catalog support, not runtime/hosted CI execution: both minimum runtime
+and hosted CI remain unexecuted. Exact URLs and final judge/repeat/isolation
+evidence are in STAGE2-VERIFICATION.md. Only StreamData1.3.0 test-only/runtime:false
+is declared/resolved in both trees, no transitive/runtime deps or additions.
+No model loop/staging/commit/push/skill edit. Independent review remains a gate.
+
+### Current final-snapshot completion results
+
+Stub unchanged judge exits1 as expected (107.916636s):
+all21 earlier tasks pass, all7 new T22–T27/T29 fail substantively; full stub suite
+80/97, 17 failures. Private unchanged judge exits0/all28
+(247.197920s), T29 97 checks (8 properties,89tests),
+replay1839/44728/7 and protocol36/36. Exact server repeat-until-failure50 exits0
+(256.183455s): 51 suites,357 executions,allpass.
+Independent format/compile/CI identity gate exits0 (CI1passed). No code changes
+by verification; only this result note and verification completion note follow
+the judge. Detailed evidence/inventories are external as cited in
+STAGE2-VERIFICATION.md. Minimum runtime/hosted CI still unexecuted; review required.

@@ -1,0 +1,38 @@
+# Complete; do not change. Identity/provenance: test/fixtures/stage2-ci-sha256.json.
+name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MIX_ENV: test
+    defaults:
+      run:
+        working-directory: dwrr-elixir
+    strategy:
+      matrix:
+        include:
+          - elixir: '1.18.4'
+            otp: '27.3'
+          - elixir: '1.20.4'
+            otp: '29.1.2'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: dwrr-elixir
+      - uses: erlef/setup-beam@v1
+        with:
+          elixir-version: ${{ matrix.elixir }}
+          otp-version: ${{ matrix.otp }}
+      - uses: actions/checkout@v4
+        with:
+          repository: version2beta/dwrr-spec
+          ref: 8a0e3cf9ae860ba207213590c00feeb822bdd8f2
+          path: dwrr-spec
+      - run: mix local.hex --force && mix deps.get --check-locked
+      - run: mix format --check-formatted
+      - run: mix compile --warnings-as-errors
+      - run: mix test --warnings-as-errors --no-color
+      - run: python3 ../dwrr-spec/tools/replay.py --driver 'env MIX_ENV=test mix run --no-compile --no-start scripts/conformance_driver.exs'
+      - run: python3 ../dwrr-spec/tools/check_driver.py --driver 'env MIX_ENV=test mix run --no-compile --no-start scripts/conformance_driver.exs'
