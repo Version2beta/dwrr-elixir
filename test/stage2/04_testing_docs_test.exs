@@ -1,4 +1,3 @@
-# Complete; do not change.
 Code.require_file("../support/stage2_assets_helper.exs", __DIR__)
 
 defmodule Dwrr.Stage2.TestingDocsTest do
@@ -17,7 +16,31 @@ defmodule Dwrr.Stage2.TestingDocsTest do
     # Execute the documented command without recursing into this documentation test.
     {out, status} = System.cmd("sh", ["-c", command], stderr_to_stdout: true)
     assert status == 0, out
-    assert out =~ "Result: 8 passed"
+    assert successful_property_summary?(out), out
+  end
+
+  test "property replay summary accepts both runtime formats but not missing or failed properties" do
+    for summary <- ["Result: 8 passed", "8 properties, 0 failures"] do
+      assert successful_property_summary?("........\n#{summary}\nRandomized with seed 4242\n")
+    end
+
+    for output <- [
+          "",
+          "0 properties, 0 failures",
+          "7 properties, 0 failures",
+          "8 properties, 1 failure",
+          "8 properties, 1 failure, 0 failures",
+          "Result: 0 passed",
+          "Result: 7/8 passed",
+          "Result: 8 passed (skipped: 1)",
+          "prefix Result: 8 passed suffix"
+        ] do
+      refute successful_property_summary?(output), output
+    end
+  end
+
+  defp successful_property_summary?(output) do
+    Regex.match?(~r/^(?:Result: 8 passed|8 properties, 0 failures)\r?$/m, output)
   end
 
   test "testing guide records real inventory, bounded oracle and disposable mutation procedure" do

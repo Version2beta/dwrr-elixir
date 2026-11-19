@@ -311,9 +311,20 @@ hosted CI execution nor proof the minimum toolchain is compatible.
 
 Formatting, warnings-as-errors compilation, full tests including all preparation
 assets, external replay and protocol checker. Installed Elixir1.20.4 exact summary
-`Result: 97 passed (8 properties, 89 tests)` plus both exact historical external
+`Result: 101 passed (8 properties, 93 tests)` plus both exact historical external
 PASS lines. Earlier counts remain unchanged. Unchanged loop --check must reject
 every NEW task on delivered stubs for missing behavior and pass EVERY task on the
 private reference including final gate. Preparation runs no coder/model loop,
 commits/staging/push/publication/installed-skill changes. Runtime minimum unavailable
 is an explicit gap, not a fabricated success. Parent review remains required.
+
+## Post-implementation test extension (owner authorized)
+
+The owner subsequently authorized fixing the runtime-dependent property-summary
+assertion and adding missing fairness and Server behavior tests. This supersedes
+only the preparation-time test freeze for these focused additions. T22 now runs
+nine Server tests; T25 runs three documentation/summary tests. One separate
+heterogeneous-cost fairness test brings T29 to 101 checks (8 properties, 93 tests).
+Historical preparation records/counts, stage-1 assets, corpus hashes and CI
+identity remain unchanged. The property replay accepts the exact successful
+summaries of both supported ExUnit runtimes, not zero properties or failures.

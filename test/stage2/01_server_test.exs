@@ -1,4 +1,3 @@
-# Complete; do not change.
 defmodule Dwrr.Stage2.ServerTest do
   use ExUnit.Case, async: false
   import Dwrr.TestSupport, only: [item: 1, item: 2]
@@ -131,6 +130,67 @@ defmodule Dwrr.Stage2.ServerTest do
     refute restarted == first
     assert {:ok, [], fresh} = S.take(restarted, 1)
     assert fresh === Dwrr.new(2)
+  end
+
+  test "timed-out enqueue executes after the real server resumes, without rollback or retry" do
+    pid = start_supervised!({S, 1})
+    items = [item(:accepted_after_timeout, 3)]
+    {:ok, expected} = Dwrr.enqueue(Dwrr.new(1), 0, items)
+    :ok = :sys.suspend(pid)
+
+    try do
+      assert {:timeout, {GenServer, :call, [^pid, {:enqueue, 0, ^items}, 5000]}} =
+               catch_exit(S.enqueue(pid, 0, items))
+
+      # The suspended real server has not handled the call. Its expired reply
+      # alias does not cancel the single request still in its mailbox.
+      assert {:messages, [{:"$gen_call", _from, {:enqueue, 0, ^items}}]} =
+               Process.info(pid, :messages)
+    after
+      :ok = :sys.resume(pid)
+    end
+
+    # This same-sender call is a processing barrier after the timed-out enqueue.
+    assert {:ok, [], ^expected} = S.take(pid, 0)
+    assert {:ok, [%Dwrr.Scheduled{value: :accepted_after_timeout, cost: 3}], _} = S.take(pid, 2)
+    assert {:ok, [], _} = S.take(pid, 1)
+  end
+
+  test "supervisor automatically replaces an ArgumentError crash with original fresh state" do
+    capture_log(fn ->
+      sup =
+        start_supervised!(%{
+          id: :crash_owner,
+          start: {Supervisor, :start_link, [[], [strategy: :one_for_one]]}
+        })
+
+      # Observe successful starts, including the supervisor's automatic restart,
+      # without polling or explicitly terminating/restarting the child.
+      spec = %{S.child_spec(2) | start: {__MODULE__, :start_observed_server, [2, self()]}}
+      {:ok, first} = Supervisor.start_child(sup, spec)
+      assert_receive {:server_started, ^first}
+      assert {:ok, _} = S.set_quantum(first, 0, 9)
+      assert {:ok, _} = S.enqueue(first, 0, [item(:lost_original)])
+      assert {2, _} = S.add_queue(first)
+      assert {:ok, _} = S.enqueue(first, 2, [item(:lost_added)])
+      ref = Process.monitor(first)
+
+      assert {{%ArgumentError{}, _}, _} = catch_exit(S.set_quantum(first, 0, -1))
+      assert_receive {:DOWN, ^ref, :process, ^first, {%ArgumentError{}, _}}
+      assert_receive {:server_started, restarted}
+      refute restarted == first
+      assert [{S, ^restarted, :worker, _modules}] = Supervisor.which_children(sup)
+      assert {:ok, [], fresh} = S.take(restarted, 0)
+      assert fresh === Dwrr.new(2)
+      assert {:error, :invalid_index} = S.enqueue(restarted, 2, [item(:no_added_queue)])
+      assert {:ok, [], ^fresh} = S.take(restarted, 10)
+    end)
+  end
+
+  def start_observed_server(count, observer) do
+    {:ok, pid} = result = S.start_link(count)
+    send(observer, {:server_started, pid})
+    result
   end
 
   test "default call timeout is used; no retry; invalid initialization fails" do

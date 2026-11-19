@@ -211,7 +211,7 @@
       "title": "Minimal Server: initialization, operations, serialization and failures",
       "test": "MIX_ENV=test mix test test/stage2/01_server_test.exs --warnings-as-errors --no-color",
       "expect": [
-        "^Result: 7 passed$"
+        "^Result: 9 passed$"
       ],
       "tier": "hard"
     },
@@ -238,7 +238,7 @@
       "title": "TESTING: bounded properties, diagnostics and reproduction",
       "test": "MIX_ENV=test mix test test/stage2/04_testing_docs_test.exs --warnings-as-errors --no-color",
       "expect": [
-        "^Result: 2 passed$"
+        "^Result: 3 passed$"
       ],
       "tier": "normal"
     },
@@ -265,7 +265,7 @@
       "title": "Whole tree: formatted, warnings-as-errors, all tests, both conformance tools",
       "test": "mix format --check-formatted && MIX_ENV=test mix compile --warnings-as-errors && MIX_ENV=test mix test --warnings-as-errors --no-color && python3 ../dwrr-spec/tools/replay.py --driver 'env MIX_ENV=test mix run --no-compile --no-start scripts/conformance_driver.exs' && python3 ../dwrr-spec/tools/check_driver.py --driver 'env MIX_ENV=test mix run --no-compile --no-start scripts/conformance_driver.exs'",
       "expect": [
-        "^Result: 97 passed \\(8 properties, 89 tests\\)$",
+        "^Result: 101 passed \\(8 properties, 93 tests\\)$",
         "^PASS: 1839 cases, 44728 steps, 7 files$",
         "^PASS: 36 of 36 checks passed$"
       ],

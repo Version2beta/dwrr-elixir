@@ -15,6 +15,10 @@ failure, and which checks were actually run.
   flushing, exit status 0 at end of input, and exit status 2 for each protocol
   error.
 - **Eight properties** in `test/stage2/properties_test.exs`.
+- **One heterogeneous-cost fairness test** in `test/stage2/fairness_test.exs`,
+  checking the advertised cost bound at closed visits under continuous backlog.
+- **Nine Server tests**, including a real timed-out enqueue that executes after
+  resume and an ArgumentError crash automatically restarted by its supervisor.
 - **Three naive anchor tests** in `test/stage2/naive_reference_test.exs`. They
   check the literal naive reference model, which is independent of the production
   code.
@@ -29,8 +33,10 @@ dependency and is not part of the runtime.
 MIX_ENV=test mix test test/stage2/properties_test.exs --seed 4242 --warnings-as-errors --no-color
 ```
 
-The expected result is `Result: 8 passed`. ExUnit prints the seed it used
-(`Running ExUnit with seed: ...`), so a fixed `--seed` makes the run repeatable.
+The expected successful summary is `Result: 8 passed` on newer ExUnit or
+`8 properties, 0 failures` on Elixir 1.18. The executable documentation check
+requires all eight properties and rejects missing, zero or failing runs.
+ExUnit prints the seed it used, so a fixed `--seed` makes the run repeatable.
 
 ## Bounded domains
 
@@ -51,9 +57,16 @@ The properties are bounded on purpose, so that the naive oracle can finish.
 - **Conservation, FIFO, errors, state, branches and split takes:** each is
   checked by at least one property. Split takes check that `take a` followed by
   `take b` gives the same items and final state as `take (a + b)`.
-- **Stable backlog fairness** is checked only for a bounded case: two queues with
-  unit costs, small quanta, and a backlog that stays non-empty across one
-  reweight. It is not a general promise for changing backlogs.
+- **Stable backlog fairness** includes the bounded two-queue unit-cost property
+  across one reweight, plus a separate three-queue heterogeneous-cost test.
+  The latter observes 600 single-item takes with nonempty backlogs and fixed
+  unequal quanta, each at least its queue's maximum cost. Thus each visit serves
+  and queue transitions independently count grants, without hidden idle visits.
+  Only after a transition closes the preceding visit does it check
+  `0 <= k * quantum - served_cost == credit < maximum_item_cost` (and below the
+  next head's cost), for at least 30 closed visits per queue. An active paused
+  visit is not mistaken for a closed one. This is bounded declared-cost fairness,
+  not a general promise for changing backlogs or elapsed time.
 
 ## Failures and diagnostics
 
@@ -106,10 +119,12 @@ protocol-error checks plus interactive unused-recognized-field and arbitrary-siz
 integer histories. It now reports `PASS: 41 of 41 checks passed`. The pinned
 commands/36-check expectation above and protected fixture provenance are historical
 and unchanged, not a claim that the updated checker exists at that old commit.
-Current-source Elixir passed the expanded checker and the same 1,839-case /
-44,728-step replay; the native suite passed 97 checks (8 properties, 89 tests).
+The earlier current-source run passed the expanded checker and the same
+1,839-case / 44,728-step replay; its native suite passed 97 checks (8 properties,
+89 tests). The subsequent owner-authorized test extension raises the current
+suite to 101 checks (8 properties, 93 tests), with T22/T25/T29 counts updated.
 These local checks do not establish minimum-runtime or hosted-CI compatibility.
-No corpus, hash guard, tool pin or dependency was changed for this correction.
+No corpus, hash guard, tool pin or dependency was changed.
 
 ## Verification status
 
