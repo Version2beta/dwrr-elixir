@@ -33,3 +33,6 @@ Remaining: no issue observed in selected tests; full-suite and external conforma
 T22: minimal caller-owned Dwrr.Server.
 Work: implemented GenServer initialization, serialized core operations with exact replies/state extraction, standard supervision and default calls; selected test command -> Result: 7 passed (exit 0); server formatted and git diff --check passed.
 Remaining: no issue observed in selected tests; full-suite validation was not run in this attempt.
+T23: public docs, operation typespecs and executable examples.
+Work: Dwrr moduledoc (immutability, six tagged errors, ArgumentError domain, 2^63-1 and 2^64-3 limits, declared-cost fairness, FIFO/no overtaking) with three ordered elixir examples; @spec for the eight Dwrr operations and Server functions from the protected signature fixtures; Server moduledoc on caller ownership, timeouts and restart; stage-1 AST unchanged. MIX_ENV=test mix test test/stage2/02_public_docs_test.exs --warnings-as-errors --no-color -> Result: 3 passed (exit 0); T22 test/stage2/01_server_test.exs -> 7 passed; mix format --check-formatted on lib/dwrr.ex and lib/dwrr/server.ex passes.
+Remaining: no issue observed in the selected test; README, CI, property and full-suite validation were not run in this attempt.
