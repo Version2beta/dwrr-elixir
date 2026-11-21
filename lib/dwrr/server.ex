@@ -2,8 +2,8 @@ defmodule Dwrr.Server do
   @moduledoc """
   Caller-owned, serialized wrapper around `Dwrr` for one process.
 
-  Start it under your own supervisor or with `start_link/2`. It registers no name
-  and starts no children. Each function makes one `GenServer.call/2` with the default
+  Start it under your own supervisor or with `start_link/2`. It is unnamed by default; the `:name` option is forwarded to
+  `GenServer.start_link/3`. It starts no children. Each function makes one `GenServer.call/2` with the default
   5000 ms timeout and returns the exact `Dwrr` result, including the new scheduler.
   Tagged errors are returned unchanged and leave the stored state unchanged. Calls
   are applied in mailbox arrival order; the order of calls from different senders is
@@ -19,7 +19,20 @@ defmodule Dwrr.Server do
   """
   use GenServer
 
-  @doc "Start from count; forward standard GenServer options. Restart starts fresh."
+  @doc """
+  Start from count; forward standard GenServer options, including `:name`.
+  Restart starts fresh.
+
+  ## Examples
+
+      iex> {:ok, pid} = Dwrr.Server.start_link(1)
+      iex> {:ok, _snapshot} = Dwrr.Server.enqueue(pid, 0, [%Dwrr.Item{value: :job, cost: 1}])
+      iex> {:ok, items, _snapshot} = Dwrr.Server.take(pid, 1)
+      iex> items
+      [%Dwrr.Scheduled{queue: 0, value: :job, cost: 1}]
+      iex> GenServer.stop(pid)
+      :ok
+  """
   @spec start_link(non_neg_integer(), GenServer.options()) :: GenServer.on_start()
   def start_link(count, options \\ []), do: GenServer.start_link(__MODULE__, count, options)
 

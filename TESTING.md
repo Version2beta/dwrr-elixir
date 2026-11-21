@@ -146,8 +146,9 @@ in `.github/workflows/ci.yml`, but they have not been executed in this
 documentation. Do not treat the configuration as a passing run. See
 `docs/STAGE2-VERIFICATION.md` for what was run and what was recorded.
 
-This guide records no publication. Nothing here publishes a package, creates a
-tag, or pushes to a remote.
+The historical verification above records no publication. Running these checks
+does not publish a package, create a tag, or push to a remote. Current docs-only
+publication verification is recorded below.
 
 ## Mutation check (disposable copy only)
 
@@ -177,3 +178,43 @@ as part of local setup. The frozen main CI workflow remains unchanged: it tests
 historical `8a0e3cf9ae860ba207213590c00feeb822bdd8f2` tools, not current spec
 source. Current spec CI independently tests its own tools with the pinned
 published Go implementation; neither job is a current-spec Elixir parity claim.
+
+## Docs-only preparation validation
+
+ExDoc 0.40.5 and its six-entry tooling closure (including ExDoc) were resolved
+from Hex; `mix.lock` retains the original StreamData 1.3.0 tuple unchanged.
+`docs/hexdocs-lock.sha256` records the exact resulting lock. The metadata gate
+now requires both scoped dependencies and that exact closure/hash; historical
+manifests, CI identity and behavior checks are unchanged. ExDoc is dev-only and
+not a runtime dependency or a dependency of the standalone example.
+
+On Elixir 1.20.4 / OTP 29, the docs preparation suite passes 119 checks
+(9 doctests, 8 properties, 102 tests), and fair-transfer passes 7 tests.
+`test/hexdocs_test.exs` covers public API examples, guide service order, name
+forwarding and documentation configuration. A real `mix docs --warnings-as-errors`
+build and docs-only Hex dry-run pass. The minimum CI pairing is not locally
+available; these are not claims of minimum-runtime or hosted-CI execution.
+The local HTML is `doc/index.html` (generated and ignored). Independent review
+resolved the generic source-link and guide preview-link findings before upload.
+The owner subsequently completed interactive docs-only publication.
+
+### Public documentation verification (2026-11-21)
+
+- https://hexdocs.pm/dwrr/0.1.0/ returns HTTP 200 and redirects in HTML to the
+  getting-started landing page. All nine public HTML pages returned HTTP 200.
+- Navigation exposes exactly `Dwrr`, `Dwrr.Item`, `Dwrr.Scheduled` and
+  `Dwrr.Server`. Across the pages, 171 local links/anchors passed inspection and
+  ten referenced assets returned HTTP 200. ExDoc's optional host configuration
+  `docs_config.js` was excluded from local asset checks.
+- Generic View Source points to the exact release tree; library source links use
+  files at `88c8dc71f673c35281de00d602c5ae2a4a951f7e`, without misleading current
+  line numbers. The docs-only guide has no historical source or Hex Preview link.
+- The Hex release API reports `has_docs: true`; its checksum equals the fetched
+  outer package tar's SHA256 and the retained prepublication API checksum:
+  `302456fe434b9bc0279f06bd39cdbabba3026ffa6c19f53723c3b6adf02706b4`.
+  This confirms the package archive is unchanged, not that later docs edits were
+  included in that archive.
+
+Verification used only public HTTP reads; no upload, credential access, tag,
+commit, push or remote source mutation was performed during verification. Minimum-runtime
+and hosted-CI execution remain unverified as noted above.

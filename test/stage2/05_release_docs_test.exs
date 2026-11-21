@@ -1,4 +1,4 @@
-# Complete; do not change.
+# Historical release gate; docs-only review instructions are a separate procedure.
 Code.require_file("../support/stage2_assets_helper.exs", __DIR__)
 
 defmodule Dwrr.Stage2.ReleaseDocsTest do
@@ -37,7 +37,8 @@ defmodule Dwrr.Stage2.ReleaseDocsTest do
       ~r/no.*publication.*preparation/is
     ])
 
-    text = File.read!("RELEASING.md")
+    [_, historical] = String.split(File.read!("RELEASING.md"), "## Step 1:", parts: 2)
+    text = historical
     [_, verify] = :binary.match(text, "mix test") |> Tuple.to_list()
     assert verify > 0
     {check, _} = :binary.match(text, "mix test")

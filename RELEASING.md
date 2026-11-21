@@ -2,14 +2,64 @@
 
 Owner procedure for releasing `dwrr` 0.1.0. This document is not authorization.
 Each step that publishes, tags or pushes needs explicit owner approval at the time
-it is run. This guide records no publication and is release preparation only.
+it is run. The historical package procedure below records no publication; it
+describes the original release preparation, not permission to overwrite the
+already published version. The current verified publication status follows.
+
+## Current status
+
+Hex package `dwrr` 0.1.0 is public, released from source commit `88c8dc7`.
+HexDocs 0.1.0 are public at https://hexdocs.pm/dwrr/0.1.0/, independently
+verified on 2026-11-21 after the owner reported successful interactive docs-only
+publication. The first automated attempt stopped at OTP authentication; no OTP or
+credentials were captured. No further upload was needed for verification.
+
+The Hex release API reports `has_docs: true`. Its `checksum` matches the SHA256
+of the downloaded outer `dwrr-0.1.0.tar` and the retained prepublication checksum:
+`302456fe434b9bc0279f06bd39cdbabba3026ffa6c19f53723c3b6adf02706b4`.
+The package is unchanged. Live checks passed for the getting-started landing,
+four public modules, release-pinned source links, navigation and assets, with no
+bogus guide preview link.
+
+The docs-only preparation adds ExDoc 0.40.5 (`only: :dev, runtime: false`) and
+a public getting-started guide. No package republication, commit, push or tag
+was performed. The historical release procedure below is retained, not a
+direction to rerun it.
+
+### Docs-only review gate (for separately approved future updates)
+
+Run `MIX_ENV=dev mix docs --warnings-as-errors` and inspect `doc/index.html`,
+getting-started, the four public API pages, navigation, examples and source links.
+Internal Core/conformance modules and this owner procedure are excluded. Links
+resolve to release files at `88c8dc71f673c35281de00d602c5ae2a4a951f7e`;
+file-level links deliberately omit current documentation line numbers. The new
+guide has no historical source link because it did not exist in that commit.
+Executable library AST must match that release exactly (ignoring documentation
+and typespec attributes only). Never claim that later documentation edits were
+in the package archive.
+
+The installed Hex 2.7.0 help confirms the docs-only command. After independent
+build review and approval, use only:
+
+```sh
+MIX_ENV=dev mix hex.publish docs
+```
+
+Do not use the unqualified publish task, `package`, `--replace` or a package tar.
+`MIX_ENV=dev mix hex.publish docs --dry-run` generates docs without uploading.
+Hex may regenerate docs during publication: use the same reviewed tree, lock and
+runtime. If authentication/2FA requires an interactive owner terminal, stop and
+have the owner run the exact docs-only command there; never transmit an OTP or
+credentials in chat. After publication, verify the version-specific HexDocs URL
+and update this status. The completed publication is recorded above; do not
+repeat it merely to verify the site.
 
 ## Identity
 
 - Package and application: `dwrr`, version `0.1.0` (`mix.exs`).
 - Canonical repository: https://github.com/version2beta/dwrr-elixir
-- Intended Hex package: https://hex.pm/packages/dwrr (not published yet)
-- Intended HexDocs: https://hexdocs.pm/dwrr/ (not published yet)
+- Published Hex package: https://hex.pm/packages/dwrr/0.1.0
+- HexDocs: https://hexdocs.pm/dwrr/0.1.0/ (public, verified 2026-11-21)
 - License: MIT (`LICENSE`).
 - Runtime minimum: Elixir >= 1.18 on OTP 27. Current: Elixir 1.20.4 on OTP 29.
 
