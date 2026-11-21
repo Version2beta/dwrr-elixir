@@ -4,8 +4,37 @@ Deficit weighted round robin (DWRR) scheduler for Elixir. The core is a set of
 pure functions over immutable values. `Dwrr.Server` is an optional, caller-owned
 wrapper that keeps one scheduler in one process.
 
-Intended release: **0.1.0**, not yet published. The Hex package and application
-are `dwrr`.
+Intended release: **0.1.0**, unpublished according to local release records.
+The Hex package and application are `dwrr`.
+
+## Other languages
+
+- [DWRR for Go](https://github.com/version2beta/dwrr)
+- [DWRR for Python](https://github.com/version2beta/dwrr-python)
+
+These libraries share fixed-quantum scheduling semantics, with language-specific
+APIs and additional features. See each library's README for its supported contract.
+
+## Shared specification
+
+[dwrr-spec](https://github.com/version2beta/dwrr-spec) defines the shared
+[fixed-quantum contract](https://github.com/version2beta/dwrr-spec/blob/main/SPEC.md),
+[conformance corpus](https://github.com/version2beta/dwrr-spec/tree/main/corpus)
+and [driver protocol](https://github.com/version2beta/dwrr-spec/blob/main/PROTOCOL.md) /
+[conformance tools](https://github.com/version2beta/dwrr-spec/tree/main/tools).
+They let implementations with different APIs check the same service order,
+errors and numeric limits rather than rely on similar-looking algorithms.
+This is a development/conformance resource, **not a runtime dependency**.
+Pinned revisions and vendored snapshots make checks reproducible; they do not
+automatically track current spec source or establish all-sequences conformance.
+
+This implementation targets the fixed-quantum core through immutable values;
+`Dwrr.Server` and Elixir-domain validation are local API choices, not shared
+requirements. Fixtures and the main CI retain historical revision
+`8a0e3cf9ae860ba207213590c00feeb822bdd8f2`, rather than automatically following
+upstream. Separate current-source checks must identify their revision and
+results; see [TESTING.md](TESTING.md). The standalone example CI does not change
+that historical conformance-tool pin.
 
 ## The need
 
@@ -33,9 +62,15 @@ The intended dependency for release 0.1.0 is:
 {:dwrr, "~> 0.1.0"}
 ```
 
-The package is not on Hex yet, so this line is the intended install, not a working
-fetch today. Until release, depend on this repository directly (for example a
-`path:` dependency) and run `mix deps.get`.
+Local release records mark the package as not yet on Hex; this is an intended
+install, not a verified public fetch. Until release, use a local checkout, for example:
+
+```text
+{:dwrr, path: "../dwrr-elixir"}
+```
+
+Adjust the path for your application. The core has no dependencies to fetch;
+this repository's own tests additionally require StreamData.
 
 ## Examples
 
@@ -68,6 +103,22 @@ s = Dwrr.new(2)
 {:ok, served, _s} = Dwrr.take(s, 10)
 result = Enum.map(served, &{&1.queue, &1.value, &1.cost})
 ```
+
+Expected `result`:
+
+```text
+[{0, :packet_a, 2}, {0, :packet_b, 2}, {1, :packet_x, 4}, {1, :packet_y, 1}]
+```
+
+### Fair file-transfer simulation
+
+The [standalone example](examples/fair_transfer/README.md) uses Basic/Team/Business
+byte quanta of 1024/2048/4096 and repeated `take(s, 1)` calls. Its twelve pretend
+records, selection order and cumulative totals match the Python example; the Go
+README uses a different backlogged dataset. Final totals are Basic=5120,
+Team=6656 and Business=12288 bytes: finite offered demand, not a promised 1:2:4
+split. There is no real transfer I/O, timing, bandwidth pacing or preemption.
+Use bounded chunks as items in a real sender for finer interleaving.
 
 ### Caller-owned worker orchestration
 
@@ -129,6 +180,25 @@ result =
 {:ok, [], _s} = Dwrr.take(s, 10)
 ```
 
+## Public API
+
+`Dwrr.new(count)` creates `count` empty queues (zero is valid), each with quantum
+1 and credit 0. `%Dwrr.Item{value: value, cost: cost}` is the enqueue record;
+`take/2` returns `%Dwrr.Scheduled{queue: index, value: value, cost: cost}` records.
+
+| Operation | Successful result |
+| --- | --- |
+| `enqueue(s, index, items)` | `{:ok, scheduler}` |
+| `set_quantum(s, index, quantum)` | `{:ok, scheduler}` |
+| `add_queue(s)` | `{index, scheduler}` |
+| `remove_queue(s)` | `scheduler` (unchanged when no queues exist) |
+| `remove_head(s, index)` | `{:ok, item_or_nil, scheduler}` |
+| `drain_queue(s, index)` | `{:ok, items, scheduler}` in FIFO order |
+| `take(s, n)` | `{:ok, scheduled_items, scheduler}` |
+
+`Dwrr.Server` exposes the same operations against a caller-started server and
+returns the same results, including immutable scheduler snapshots.
+
 ## Behavior worth knowing
 
 - **Results.** Most operations return `{:ok, scheduler}`, `{:ok, value, scheduler}`
@@ -147,6 +217,10 @@ result =
 - **Immutable storage.** Old snapshots stay valid. One snapshot can be branched into
   separate histories, and branches do not share writes. Values are stored and
   returned without being inspected.
+- **Visits.** Nonempty queues earn their quantum at the start of a visit in
+  cyclic index order. Credit carries across visits while backlogged; empty
+  queues hold no credit. Whole unproductive rounds are skipped exactly, so a
+  huge cost with quantum 1 does not require one iteration per grant.
 - **FIFO, no overtaking.** Items leave a queue in order. A queue whose head costs
   more than its credit waits, and later items in that queue do not jump ahead.
 - **Take is a retrieval limit, not a fairness cap.** `take/2` returns up to `n` items in service order. If it
@@ -164,15 +238,23 @@ result =
 - **Limits.** Costs and quanta are limited to 2^63-1. Each queue's credit stays within
   2^64-3. These are shared scheduler limits, not BEAM integer limits.
 - **Fairness is by declared cost.** While queues stay backlogged, each queue's served
-  cost stays within one maximum item cost of its quantum times the number of its
-  visits. This is not an unrestricted fairness promise for dynamic backlogs. The
-  scheduler does not measure time.
+  cost at closed visit boundaries stays within one maximum item cost of its
+  fixed quantum times the number of its visits. A paused active visit is not a
+  closed visit. This is not an unrestricted fairness promise for dynamic backlogs.
+  The scheduler does not measure time.
 - **Server.** Each call is one `GenServer.call/2` with the default 5000 ms timeout.
   A timeout does not prove that the operation was rolled back. There are no retries
   and no backpressure. An argument outside the `Dwrr` domain raises `ArgumentError`
   inside the server, which then terminates. The caller sees an exit, not a tagged
   error. A restarted server starts fresh from its original count, so queued items,
   quantum changes and added queues are lost. Nothing is persisted.
+
+There are no built-in queue capacity limits, admission control or resource-exhaustion
+recovery guarantees. Large counts, batches and retained immutable snapshots still
+consume memory. Pure histories need no shared lock; callers coordinate which
+snapshot to retain. The Server serializes its own history, not caller-owned
+branches. Neither interface waits for producers when empty; `take(s, 0)` or an
+empty scheduler returns `{:ok, [], s}`. Selection still costs CPU and memory.
 
 ## How we know it's correct
 
@@ -186,8 +268,8 @@ result =
 - The conformance driver replays that corpus through the Elixir implementation.
 - Focused tests cover each operation and the `Dwrr.Server` behavior.
 
-Local verification ran on Elixir 1.20.4 / OTP 29. The minimum Elixir 1.18 / OTP 27
-and the full CI matrix (Elixir 1.18.4 / OTP 27.3 and Elixir 1.20.4 / OTP 29.1.2) are
+Historical local verification ran on Elixir 1.20.4 / OTP 29. The minimum
+Elixir 1.18 / OTP 27 and the full CI matrix (Elixir 1.18.4 / OTP 27.3 and Elixir 1.20.4 / OTP 29.1.2) are
 configured but not verified by this README. See [TESTING.md](TESTING.md).
 
 ## Check it yourself
@@ -228,11 +310,12 @@ historical `8a0e3cf9ae860ba207213590c00feeb822bdd8f2` snapshot. Sibling working-
 corrections clarify that negative costs/quanta are language-local and wire
 integers have no signed-32-bit protocol cap, add language mappings, and repair
 the Go adapter/checker; no scheduler semantics or corpus bytes changed. They do
-not silently repin these historical fixtures or CI. Current-source Elixir was
-also checked against the expanded sibling checker: **41/41**, plus all
-**1,839 cases / 44,728 steps**. Python is still an unapproved design target, not
-a working third implementation. Go's unreleased callbacks/result API and its
-generation-exhaustion restriction are not shared fixed-core requirements.
+not silently repin these historical fixtures or CI. Historical verification records
+report that Elixir was also checked against the expanded sibling checker:
+**41/41**, plus all **1,839 cases / 44,728 steps**. Python now has a working
+mutable, internally locked implementation; its public API and language-domain
+validation differ from Elixir's immutable core. Go's unreleased callbacks/result
+API and generation-exhaustion restriction are not shared fixed-core requirements.
 The sibling protocol now permits native count-representation exhaustion as a
 resource failure, not malformed input: Go detects counts above native `int` before
 allocation, emits stderr and exits 1 with no response or later processing; prior

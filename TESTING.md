@@ -166,3 +166,14 @@ disposable copy, never in the working tree or the upstream checkout.
 
 Never edit the upstream corpus, the expected responses, or the real core to make
 a check pass.
+
+## Standalone example CI
+
+`.github/workflows/examples.yml` separately runs fair-transfer format/tests on
+the same two runtime pairs, with read-only permissions and a ten-minute limit.
+Its only dependency is the root project in this checkout; no sibling spec or
+registry package is required. This new workflow has not been executed hosted
+as part of local setup. The frozen main CI workflow remains unchanged: it tests
+historical `8a0e3cf9ae860ba207213590c00feeb822bdd8f2` tools, not current spec
+source. Current spec CI independently tests its own tools with the pinned
+published Go implementation; neither job is a current-spec Elixir parity claim.
