@@ -42,6 +42,7 @@ defmodule Dwrr do
   {:ok, s} = Dwrr.enqueue(s, 0, [%Dwrr.Item{value: :job, cost: 2}])
   {:ok, served, _s} = Dwrr.take(s, 1)
   result = Enum.map(served, & &1.value)
+  # => [:job]
   ```
 
   ```elixir
@@ -50,11 +51,13 @@ defmodule Dwrr do
   {:ok, served, _after_take} = Dwrr.take(old, 1)
   {:ok, drained, _after_drain} = Dwrr.drain_queue(old, 0)
   result = {Enum.map(served, & &1.value), Enum.map(drained, & &1.value)}
+  # => {[:original], [:original]}
   ```
 
   ```elixir
   s = Dwrr.new(1)
   result = Dwrr.enqueue(s, 0, [%Dwrr.Item{value: :job, cost: 0}])
+  # => {:error, :zero_cost}
   ```
   """
   defstruct queues: %{}, busy: nil, count: 0, total: 0, cursor: 0, active: false
@@ -82,40 +85,106 @@ defmodule Dwrr do
           | :cost_too_large
           | :zero_quantum
           | :quantum_too_large
-  @doc "Create count empty queues (nonnegative integer); return the scheduler."
+  @doc """
+  Create count empty queues (nonnegative integer); return the scheduler.
+
+  ## Examples
+
+      iex> s = Dwrr.new(1)
+      iex> Dwrr.take(s, 0) |> elem(1)
+      []
+  """
   @spec new(non_neg_integer()) :: t(term())
   defdelegate new(count), to: Dwrr.Core
 
-  @doc "Append a proper list of Item structs atomically; return {:ok, scheduler} or {:error, code}."
+  @doc """
+  Append a proper list of Item structs atomically; return {:ok, scheduler} or {:error, code}.
+
+  ## Examples
+
+      iex> {:ok, s} = Dwrr.enqueue(Dwrr.new(1), 0, [%Dwrr.Item{value: :job, cost: 2}])
+      iex> {:ok, items, _s} = Dwrr.take(s, 1)
+      iex> items
+      [%Dwrr.Scheduled{queue: 0, value: :job, cost: 2}]
+  """
   @spec enqueue(t(value), integer(), [%Dwrr.Item{cost: non_neg_integer(), value: value}]) ::
           {:ok, t(value)} | {:error, error()}
         when value: term()
   defdelegate enqueue(s, queue, items), to: Dwrr.Core
 
-  @doc "Retrieve up to n Scheduled structs, preserving paused visits; return {:ok, items, scheduler} or {:error, code}."
+  @doc """
+  Retrieve up to n Scheduled structs, preserving paused visits; return {:ok, items, scheduler} or {:error, code}.
+
+  ## Examples
+
+      iex> Dwrr.take(Dwrr.new(1), -1)
+      {:error, :negative_take}
+  """
   @spec take(t(value), integer()) ::
           {:ok, [Dwrr.Scheduled.t(value)], t(value)} | {:error, error()}
         when value: term()
   defdelegate take(s, n), to: Dwrr.Core
 
-  @doc "Set quantum for the next grant without changing credit; return {:ok, scheduler} or {:error, code}."
+  @doc """
+  Set quantum for the next grant without changing credit; return {:ok, scheduler} or {:error, code}.
+
+  ## Examples
+
+      iex> Dwrr.set_quantum(Dwrr.new(1), 0, 0)
+      {:error, :zero_quantum}
+  """
   @spec set_quantum(t(value), integer(), non_neg_integer()) ::
           {:ok, t(value)} | {:error, error()}
         when value: term()
   defdelegate set_quantum(s, queue, quantum), to: Dwrr.Core
-  @doc "Append an empty queue; return {index, scheduler}."
+
+  @doc """
+  Append an empty queue; return {index, scheduler}.
+
+  ## Examples
+
+      iex> {index, _s} = Dwrr.add_queue(Dwrr.new(1))
+      iex> index
+      1
+  """
   @spec add_queue(t(value)) :: {non_neg_integer(), t(value)} when value: term()
   defdelegate add_queue(s), to: Dwrr.Core
-  @doc "Remove only the last queue, discarding items; return scheduler."
+
+  @doc """
+  Remove only the last queue, discarding items; return scheduler.
+
+  ## Examples
+
+      iex> s = Dwrr.new(1) |> Dwrr.remove_queue()
+      iex> Dwrr.enqueue(s, 0, [])
+      {:error, :invalid_index}
+  """
   @spec remove_queue(t(value)) :: t(value) when value: term()
   defdelegate remove_queue(s), to: Dwrr.Core
 
-  @doc "Withdraw one head without debiting credit; return {:ok, Item or nil, scheduler} or {:error, code}."
+  @doc """
+  Withdraw one head without debiting credit; return {:ok, Item or nil, scheduler} or {:error, code}.
+
+  ## Examples
+
+      iex> {:ok, item, _s} = Dwrr.remove_head(Dwrr.new(1), 0)
+      iex> item
+      nil
+  """
   @spec remove_head(t(value), integer()) ::
           {:ok, Dwrr.Item.t(value) | nil, t(value)} | {:error, error()}
         when value: term()
   defdelegate remove_head(s, queue), to: Dwrr.Core
-  @doc "Withdraw all queue items FIFO; return {:ok, items, scheduler} or {:error, code}."
+
+  @doc """
+  Withdraw all queue items FIFO; return {:ok, items, scheduler} or {:error, code}.
+
+  ## Examples
+
+      iex> {:ok, items, _s} = Dwrr.drain_queue(Dwrr.new(1), 0)
+      iex> items
+      []
+  """
   @spec drain_queue(t(value), integer()) ::
           {:ok, [Dwrr.Item.t(value)], t(value)} | {:error, error()}
         when value: term()

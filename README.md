@@ -4,8 +4,13 @@ Deficit weighted round robin (DWRR) scheduler for Elixir. The core is a set of
 pure functions over immutable values. `Dwrr.Server` is an optional, caller-owned
 wrapper that keeps one scheduler in one process.
 
-Intended release: **0.1.0**, unpublished according to local release records.
+Published release: **0.1.0** on [Hex](https://hex.pm/packages/dwrr/0.1.0).
 The Hex package and application are `dwrr`.
+[HexDocs for 0.1.0](https://hexdocs.pm/dwrr/0.1.0/) are public, with a
+[getting-started guide](https://hexdocs.pm/dwrr/0.1.0/getting-started.html)
+and API reference. Documentation was published separately; the package is unchanged.
+To build locally, run `MIX_ENV=dev mix docs --warnings-as-errors` and open
+`doc/index.html`.
 
 ## Other languages
 
@@ -56,14 +61,16 @@ store, branch and test.
 
 ## Quick start
 
-The intended dependency for release 0.1.0 is:
+Add the published package to your application's `mix.exs` dependency list:
 
 ```text
 {:dwrr, "~> 0.1.0"}
 ```
 
-Local release records mark the package as not yet on Hex; this is an intended
-install, not a verified public fetch. Until release, use a local checkout, for example:
+Then run `mix deps.get` in your application. This selects the 0.1.x series;
+use `{:dwrr, "== 0.1.0"}` if you need that exact release.
+
+For development against a local source checkout, use this instead:
 
 ```text
 {:dwrr, path: "../dwrr-elixir"}
@@ -112,13 +119,15 @@ Expected `result`:
 
 ### Fair file-transfer simulation
 
-The [standalone example](examples/fair_transfer/README.md) uses Basic/Team/Business
+The [standalone example](https://github.com/version2beta/dwrr-elixir/blob/88c8dc71f673c35281de00d602c5ae2a4a951f7e/examples/fair_transfer/README.md) uses Basic/Team/Business
 byte quanta of 1024/2048/4096 and repeated `take(s, 1)` calls. Its twelve pretend
 records, selection order and cumulative totals match the Python example; the Go
 README uses a different backlogged dataset. Final totals are Basic=5120,
 Team=6656 and Business=12288 bytes: finite offered demand, not a promised 1:2:4
 split. There is no real transfer I/O, timing, bandwidth pacing or preemption.
-Use bounded chunks as items in a real sender for finer interleaving.
+Use bounded chunks as items in a real sender for finer interleaving. The example
+and historical kit assets below require a source checkout; they are not shipped
+in the Hex package.
 
 ### Caller-owned worker orchestration
 
@@ -301,8 +310,11 @@ The conformance replay needs a sibling `dwrr-spec` checkout at the pinned commit
 ## Current implementation and shared-source status
 
 The pure core, driver, optional Server, public docs and package metadata are
-implemented in this checkout; intended 0.1.0 remains unpublished. The owner-run
-kit instructions below are historical preparation instructions, not a statement
+implemented in this checkout. Hex package `dwrr` 0.1.0 was released from source
+commit `88c8dc7`; the driver is checkout-only. Versioned
+[HexDocs](https://hexdocs.pm/dwrr/0.1.0/) are public, verified on 2026-11-21.
+Source links remain pinned to that release, not these later documentation edits.
+The owner-run kit instructions below are historical preparation instructions, not a statement
 that these files are still stubs or authorization to rerun a loop.
 
 Vendored SPEC/PROTOCOL/corpus and their hash guards deliberately retain the
@@ -372,8 +384,9 @@ coder, stages/commits nothing, publishes nothing and changes no installed skill.
 
 ## Colophon
 
-- Release: 0.1.0 (intended; not yet published). Hex package and application: `dwrr`.
+- Release: 0.1.0 (published on Hex). Hex package and application: `dwrr`.
 - Elixir >= 1.18 and OTP >= 27. No runtime dependencies.
 - License: MIT. Copyright 2026 M. Robert Martin.
 - Source: https://github.com/version2beta/dwrr-elixir
-- Intended Hex and HexDocs pages for `dwrr` are not published yet.
+- Package: https://hex.pm/packages/dwrr/0.1.0.
+- Documentation: https://hexdocs.pm/dwrr/0.1.0/.

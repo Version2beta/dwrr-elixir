@@ -1,4 +1,4 @@
-# Complete; do not change.
+# Historical metadata gate with explicitly authorized docs-only tooling extension.
 defmodule Dwrr.Stage2.MetadataTest do
   use ExUnit.Case, async: false
 
@@ -38,14 +38,31 @@ defmodule Dwrr.Stage2.MetadataTest do
     assert File.read!("LICENSE") =~ "Copyright (c) 2026 M. Robert Martin"
   end
 
-  test "dependency is locked test-only, production builds contain no driver or application child" do
+  test "dependencies are locked test/dev-only, production builds contain no driver or application child" do
     assert Dwrr.MixProject.project()[:deps] == [
-             {:stream_data, "~> 1.3.0", [only: :test, runtime: false]}
+             {:stream_data, "~> 1.3.0", [only: :test, runtime: false]},
+             {:ex_doc, "~> 0.40.0", [only: :dev, runtime: false]}
            ]
 
     assert Dwrr.MixProject.application() == []
     lock = Mix.Dep.Lock.read()
-    assert Map.keys(lock) == [:stream_data]
+
+    assert Enum.sort(Map.keys(lock)) ==
+             [
+               :earmark_parser,
+               :ex_doc,
+               :makeup,
+               :makeup_elixir,
+               :makeup_erlang,
+               :nimble_parsec,
+               :stream_data
+             ]
+
+    assert elem(lock.ex_doc, 2) == "0.40.5"
+
+    assert :crypto.hash(:sha256, File.read!("mix.lock")) |> Base.encode16(case: :lower) ==
+             File.read!("docs/hexdocs-lock.sha256") |> String.trim()
+
     assert elem(lock.stream_data, 2) == "1.3.0"
     # Evaluate project paths for prod without recompiling or mutating caller's Mix environment.
     old = Mix.env()
