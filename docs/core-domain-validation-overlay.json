@@ -1,0 +1,7 @@
+{
+  "path": "lib/dwrr/core.ex",
+  "base_revision": "4ef9d16360b1ac936b33ddf23c6f1ac5e091e220",
+  "base_sha256": "2a800b84585f90321df6f5aa2dbad75a5b38d4a8dcca5e5042d24eb4e693ce48",
+  "sha256": "eeb59554d65b2367bdee007e12ddc81e6640aefb3dcb4624a47d86e7fd9a2f84",
+  "reason": "Owner-authorized enqueue and set_quantum whole-domain validation before shared errors; original historical manifest remains unchanged."
+}

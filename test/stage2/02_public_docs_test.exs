@@ -1,14 +1,23 @@
-# Complete; do not change.
+# Historical protection gate with owner-authorized, exact core overlay.
 Code.require_file("../support/stage2_assets_helper.exs", __DIR__)
 
 defmodule Dwrr.Stage2.PublicDocsTest do
   use ExUnit.Case, async: false
   import Dwrr.Stage2Support
 
-  test "stage1 public executable AST and representation remain unchanged" do
-    for {path, expected} <- JSON.decode!(File.read!("test/fixtures/stage1-preserved-sha256.json")) do
+  test "stage1 assets and public AST are preserved with the authorized core overlay" do
+    original = JSON.decode!(File.read!("test/fixtures/stage1-preserved-sha256.json"))
+    core_overlay = JSON.decode!(File.read!("docs/core-domain-validation-overlay.json"))
+    assert core_overlay["path"] == "lib/dwrr/core.ex"
+    assert core_overlay["base_revision"] == "4ef9d16360b1ac936b33ddf23c6f1ac5e091e220"
+    assert core_overlay["base_sha256"] == original["lib/dwrr/core.ex"]
+
+    for {path, historical_hash} <- original do
+      expected =
+        if path == "lib/dwrr/core.ex", do: core_overlay["sha256"], else: historical_hash
+
       actual = :crypto.hash(:sha256, File.read!(path)) |> Base.encode16(case: :lower)
-      assert actual == expected, "stage1 complete file changed: #{path}"
+      assert actual == expected, "stage1 complete file or authorized overlay changed: #{path}"
     end
 
     # The sole authorized stage-1 helper overlay is not an unchanged-file claim.

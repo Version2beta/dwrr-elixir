@@ -123,8 +123,20 @@ The earlier current-source run passed the expanded checker and the same
 1,839-case / 44,728-step replay; its native suite passed 97 checks (8 properties,
 89 tests). The subsequent owner-authorized test extension raises the current
 suite to 101 checks (8 properties, 93 tests), with T22/T25/T29 counts updated.
+The subsequent domain-validation fix adds six focused tests in
+`test/domain_validation_test.exs`: improper tails and malformed later items,
+negative/noninteger later costs, domain faults combined with invalid indexes,
+shared-error ordering, atomic rejection and retained active credit. The current
+suite passes 107 checks (8 properties, 99 tests) with seed 4242; format checking
+and test-environment compilation with warnings as errors also pass. The exact
+core overlay is checked against `docs/core-domain-validation-overlay.json`, while
+the historical manifest and all other original asset checks remain unchanged.
+External replay passes the same 1,839 cases / 44,728 steps, and the checker passes
+41/41 at the clean sibling revision `243dd125470365df2c52a6ce72de3ee8ecfce3fe`.
+This is current-source validation, not execution of the historical pinned tools.
 These local checks do not establish minimum-runtime or hosted-CI compatibility.
-No corpus, hash guard, tool pin or dependency was changed.
+No corpus, historical hash manifest, tool pin or dependency was changed. The
+public-contract hash gate now recognizes only the explicitly recorded core overlay.
 
 ## Verification status
 

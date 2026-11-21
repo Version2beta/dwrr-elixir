@@ -138,7 +138,12 @@ result =
   `:cost_too_large`, `:zero_quantum` and `:quantum_too_large`. A tagged error returns
   no new scheduler; it retains the input unchanged, so keep using the scheduler you passed in.
 - **ArgumentError.** A non-integer index or count, a negative count, or a negative
-  cost or quantum raises `ArgumentError`. It is not a tagged error.
+  or noninteger cost or quantum, or a batch that is not a proper list of `Dwrr.Item`
+  structs raises `ArgumentError`. Domain validation precedes shared error ordering:
+  enqueue validates the integer index and entire batch first; set_quantum validates
+  the integer index and nonnegative integer quantum first. Only for domain-valid
+  arguments does `:invalid_index` win, followed by the first zero/oversized cost or
+  the zero/oversized quantum. No items are appended on either kind of failure.
 - **Immutable storage.** Old snapshots stay valid. One snapshot can be branched into
   separate histories, and branches do not share writes. Values are stored and
   returned without being inspected.

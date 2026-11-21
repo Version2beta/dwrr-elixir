@@ -13,6 +13,11 @@ defmodule Dwrr do
   `:cost_too_large`, `:zero_quantum` and `:quantum_too_large`. Arguments outside the
   documented domain, such as a non-integer index or count, a negative count, or a
   negative cost or quantum, raise `ArgumentError` instead of returning a tagged error.
+  Domain validation precedes shared error ordering: enqueue checks the integer index
+  and entire proper list of Item structs with nonnegative integer costs first;
+  set_quantum checks the integer index and nonnegative integer quantum first.
+  For domain-valid arguments, an invalid index wins, then enqueue reports the first
+  zero or oversized cost, and set_quantum reports zero or oversized quantum.
 
   Values are opaque: the scheduler stores and returns them without inspecting them.
   Costs and quanta are limited to 2^63-1, and each queue's credit stays within

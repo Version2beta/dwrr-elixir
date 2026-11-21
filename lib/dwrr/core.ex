@@ -18,8 +18,10 @@ defmodule Dwrr.Core do
 
   def new(_count), do: raise(ArgumentError, "count must be a nonnegative integer")
 
-  @doc "Validate index, then all costs in order, before FIFO append."
+  @doc "Validate the whole domain, then index and costs in order, before FIFO append."
   def enqueue(s, index, items) when is_integer(index) do
+    check_items_domain!(items)
+
     with :ok <- check_index(s, index),
          :ok <- check_items(items) do
       {:ok, append(s, index, items)}
@@ -28,8 +30,9 @@ defmodule Dwrr.Core do
 
   def enqueue(_s, _index, _items), do: raise(ArgumentError, "queue index must be an integer")
 
-  @doc "Validate index then quantum; do not touch credit or active."
-  def set_quantum(s, index, quantum) when is_integer(index) do
+  @doc "Validate the domain, then index and quantum; do not touch credit or active."
+  def set_quantum(s, index, quantum)
+      when is_integer(index) and is_integer(quantum) and quantum >= 0 do
     with :ok <- check_index(s, index),
          :ok <- check_quantum(quantum) do
       {:ok, put_quantum(s, index, quantum)}
@@ -37,7 +40,7 @@ defmodule Dwrr.Core do
   end
 
   def set_quantum(_s, _index, _quantum),
-    do: raise(ArgumentError, "queue index must be an integer")
+    do: raise(ArgumentError, "queue index must be an integer and quantum a nonnegative integer")
 
   @doc "Return {old count, scheduler with appended empty queue}."
   def add_queue(%Dwrr{count: count, queues: queues} = s) do
@@ -115,11 +118,11 @@ defmodule Dwrr.Core do
 
   defp empty_queue, do: %{quantum: 1, credit: 0, size: 0, head: nil, tail: :queue.new()}
 
-  # Index precedes every other enqueue/set_quantum check (SPEC §5.2, §5.3).
+  # After domain validation, index precedes shared cost/quantum errors (SPEC §5.2, §5.3).
   defp check_index(%Dwrr{count: count}, index) when index >= 0 and index < count, do: :ok
   defp check_index(_s, _index), do: {:error, :invalid_index}
 
-  # Quantum must be 1..MAX_QUANTUM; 0 and too-large are shared errors, other inputs raise.
+  # The quantum domain is already validated; 0 and too-large are shared errors.
   defp check_quantum(0), do: {:error, :zero_quantum}
 
   defp check_quantum(quantum) when is_integer(quantum) and quantum > @max_cost,
@@ -127,16 +130,27 @@ defmodule Dwrr.Core do
 
   defp check_quantum(quantum) when is_integer(quantum) and quantum > 0, do: :ok
 
-  defp check_quantum(_quantum),
-    do: raise(ArgumentError, "quantum must be a nonnegative integer")
-
   # Replaces only the quantum; credit and active are preserved (SPEC §5.3).
   defp put_quantum(%Dwrr{queues: queues} = s, index, quantum) do
     rec = Map.fetch!(queues, index)
     %{s | queues: Map.put(queues, index, %{rec | quantum: quantum})}
   end
 
-  # Validates every item in order before any append (atomic batch).
+  # Traverse the entire proper list before any shared error can short-circuit it.
+  defp check_items_domain!([]), do: :ok
+
+  defp check_items_domain!([%Dwrr.Item{cost: cost} | rest])
+       when is_integer(cost) and cost >= 0,
+       do: check_items_domain!(rest)
+
+  defp check_items_domain!(_items),
+    do:
+      raise(
+        ArgumentError,
+        "items must be a proper list of Dwrr.Item structs with nonnegative integer costs"
+      )
+
+  # Domain-valid costs are checked in order before any append (atomic batch).
   defp check_items([]), do: :ok
 
   defp check_items([%Dwrr.Item{cost: cost} | rest])
@@ -147,9 +161,6 @@ defmodule Dwrr.Core do
 
   defp check_items([%Dwrr.Item{cost: cost} | _]) when is_integer(cost) and cost > @max_cost,
     do: {:error, :cost_too_large}
-
-  defp check_items(_items),
-    do: raise(ArgumentError, "items must be a proper list of Dwrr.Item structs")
 
   defp append(s, _index, []), do: s
 

@@ -1,6 +1,7 @@
 # dwrr-elixir: binding stage-1 specification
 
-Complete; do not change. Approved owner decisions plus dwrr-spec 0.1.1 at
+Complete historical stage-1 contract, with the owner-authorized domain-validation
+clarification below. Approved owner decisions plus dwrr-spec 0.1.1 at
 `8a0e3cf9ae860ba207213590c00feeb822bdd8f2` govern. Read protected
 `test/fixtures/dwrr-spec/SPEC.md` §§2–8 for exact scheduler state transitions,
 precedence and limits, and `PROTOCOL.md` in that directory for the complete wire
@@ -45,10 +46,16 @@ Cost/quantum validation inputs are nonnegative integers. Other types/shapes and
 negative count/cost/quantum raise ArgumentError, via guarded clauses plus explicit
 fallbacks (not FunctionClauseError). No new shared codes. Existing input state
 remains usable after all failures. Multiple outside-type-fault precedence is
-unspecified; documented-type shared errors follow upstream ordering. Opaque states
+unspecified. Domain validation precedes all shared errors: enqueue validates an
+integer index and the entire proper list of Item structs with nonnegative integer
+costs before checking index bounds or cost limits. set_quantum validates an integer
+index and a nonnegative integer quantum before checking index bounds or quantum
+limits. Thus a malformed later item, improper tail, or outside-domain cost/quantum
+raises ArgumentError even when an earlier shared error would otherwise apply.
+For domain-valid arguments, shared errors follow upstream ordering. Opaque states
 must come from this API; callers may not forge/edit struct fields.
 
-Enqueue is whole-batch atomic, checks index even for an empty batch, then costs in
+After domain validation, enqueue is whole-batch atomic, checks index even for an empty batch, then costs in
 order (zero_cost or cost_too_large). Set quantum checks index, zero_quantum,
 quantum_too_large; preserves credit and active. add appends quantum-1 empty queue.
 Remove queue drops only last, discards items, cancels that active visit and repairs
@@ -317,6 +324,16 @@ every NEW task on delivered stubs for missing behavior and pass EVERY task on th
 private reference including final gate. Preparation runs no coder/model loop,
 commits/staging/push/publication/installed-skill changes. Runtime minimum unavailable
 is an explicit gap, not a fabricated success. Parent review remains required.
+
+## Post-implementation domain validation fix (owner authorized)
+
+The owner authorized correcting enqueue and set_quantum domain validation at base
+`4ef9d16360b1ac936b33ddf23c6f1ac5e091e220`, superseding the historical core freeze
+only for this fix. The original stage-1 hash manifest remains unchanged. The exact
+core overlay and original provenance are recorded in
+`docs/core-domain-validation-overlay.json` and checked by the public-contract gate;
+all other historical paths retain their original hash checks. Focused regressions
+are in `test/domain_validation_test.exs`. No vendored fixture or hash is rewritten.
 
 ## Post-implementation test extension (owner authorized)
 
