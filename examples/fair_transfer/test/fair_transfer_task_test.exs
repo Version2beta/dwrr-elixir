@@ -12,10 +12,10 @@ defmodule Mix.Tasks.FairTransferTest do
     assert length(lines) == 13
 
     assert Enum.at(lines, 1) ==
-             "basic-1: 512 bytes | cumulative bytes: Basic=512 Team=0 Business=0"
+             "draft.pdf: 1024 bytes | cumulative bytes: Basic=0 Team=1024 Business=0"
 
     assert List.last(lines) ==
-             "basic-4: 2304 bytes | cumulative bytes: Basic=5120 Team=6656 Business=8704"
+             "report.pdf: 1024 bytes | cumulative bytes: Basic=5120 Team=6656 Business=12288"
 
     assert Enum.map(tl(lines), fn line -> hd(String.split(line, ":")) end) ==
              Enum.map(FairTransfer.run(), & &1.transfer.id)

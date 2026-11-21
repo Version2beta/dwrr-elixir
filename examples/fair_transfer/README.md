@@ -10,7 +10,7 @@ From the repository root, run offline:
 cd examples/fair_transfer
 mix compile --warnings-as-errors
 mix fair_transfer
-mix test --warnings-as-errors
+mix test --warnings-as-errors --seed 4242
 mix format --check-formatted
 ```
 
@@ -29,7 +29,9 @@ Three customers have separate FIFO queues:
 | Team | 2048 |
 | Business | 4096 |
 
-`FairTransfer.demo/0` supplies twelve variable-size pretend transfer records.
+`FairTransfer.demo/0` matches the names, per-customer FIFO order and byte costs
+in the Python example `dwrr-python/examples/fair_transfer/fair_transfer.py`.
+The twelve pretend records use file names as `:id` values; no files are read.
 `FairTransfer.run/1` is pure: it accepts a finite list of maps with `:id`, a known
 `:customer` (`:basic`, `:team`, `:business`), and positive integer `:bytes` within
 Dwrr's cost limit. It enqueues each record as
@@ -43,12 +45,23 @@ The Mix task only prints that trace; it does not send anything. For example:
 
 ```text
 Pretend transfers (quanta: Basic=1024 Team=2048 Business=4096 bytes)
-basic-1: 512 bytes | cumulative bytes: Basic=512 Team=0 Business=0
-team-1: 1024 bytes | cumulative bytes: Basic=512 Team=1024 Business=0
-business-1: 2048 bytes | cumulative bytes: Basic=512 Team=1024 Business=2048
-...
-basic-4: 2304 bytes | cumulative bytes: Basic=5120 Team=6656 Business=8704
+draft.pdf: 1024 bytes | cumulative bytes: Basic=0 Team=1024 Business=0
+chart.png: 1024 bytes | cumulative bytes: Basic=0 Team=2048 Business=0
+slides.pdf: 2048 bytes | cumulative bytes: Basic=0 Team=2048 Business=2048
+logo.png: 1024 bytes | cumulative bytes: Basic=0 Team=2048 Business=3072
+summary.pdf: 1024 bytes | cumulative bytes: Basic=0 Team=2048 Business=4096
+archive.zip: 3072 bytes | cumulative bytes: Basic=3072 Team=2048 Business=4096
+bundle.zip: 4096 bytes | cumulative bytes: Basic=3072 Team=6144 Business=4096
+backup.zip: 8192 bytes | cumulative bytes: Basic=3072 Team=6144 Business=12288
+note.txt: 256 bytes | cumulative bytes: Basic=3328 Team=6144 Business=12288
+photo.jpg: 768 bytes | cumulative bytes: Basic=4096 Team=6144 Business=12288
+index.txt: 512 bytes | cumulative bytes: Basic=4096 Team=6656 Business=12288
+report.pdf: 1024 bytes | cumulative bytes: Basic=5120 Team=6656 Business=12288
 ```
+
+The selected sequence and all cumulative totals match Python; the CLI retains
+its Elixir formatting. Basic's 3072-byte head waits for credit, so Team is served
+first. Final totals are Basic=5120, Team=6656 and Business=12288 bytes.
 
 ## Fairness and boundaries
 

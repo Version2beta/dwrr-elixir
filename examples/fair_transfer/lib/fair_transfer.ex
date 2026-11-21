@@ -15,13 +15,28 @@ defmodule FairTransfer do
 
   @spec demo() :: [transfer()]
   def demo do
-    for {customer, sizes} <- [
-          basic: [512, 1536, 768, 2304],
-          team: [1024, 3072, 512, 2048],
-          business: [2048, 1024, 4096, 1536]
+    for {customer, files} <- [
+          basic: [
+            {"archive.zip", 3072},
+            {"note.txt", 256},
+            {"photo.jpg", 768},
+            {"report.pdf", 1024}
+          ],
+          team: [
+            {"draft.pdf", 1024},
+            {"chart.png", 1024},
+            {"bundle.zip", 4096},
+            {"index.txt", 512}
+          ],
+          business: [
+            {"slides.pdf", 2048},
+            {"logo.png", 1024},
+            {"summary.pdf", 1024},
+            {"backup.zip", 8192}
+          ]
         ],
-        {bytes, index} <- Enum.with_index(sizes, 1) do
-      %{id: "#{customer}-#{index}", customer: customer, bytes: bytes}
+        {name, bytes} <- files do
+      %{id: name, customer: customer, bytes: bytes}
     end
   end
 
