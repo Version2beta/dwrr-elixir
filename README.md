@@ -126,8 +126,7 @@ README uses a different backlogged dataset. Final totals are Basic=5120,
 Team=6656 and Business=12288 bytes: finite offered demand, not a promised 1:2:4
 split. There is no real transfer I/O, timing, bandwidth pacing or preemption.
 Use bounded chunks as items in a real sender for finer interleaving. The example
-and historical kit assets below require a source checkout; they are not shipped
-in the Hex package.
+requires a source checkout; it is not shipped in the Hex package.
 
 ### Caller-owned worker orchestration
 
@@ -314,8 +313,6 @@ implemented in this checkout. Hex package `dwrr` 0.1.0 was released from source
 commit `88c8dc7`; the driver is checkout-only. Versioned
 [HexDocs](https://hexdocs.pm/dwrr/0.1.0/) are public, verified on 2026-11-21.
 Source links remain pinned to that release, not these later documentation edits.
-The owner-run kit instructions below are historical preparation instructions, not a statement
-that these files are still stubs or authorization to rerun a loop.
 
 Vendored SPEC/PROTOCOL/corpus and their hash guards deliberately retain the
 historical `8a0e3cf9ae860ba207213590c00feeb822bdd8f2` snapshot. Sibling working-tree
@@ -326,7 +323,7 @@ not silently repin these historical fixtures or CI. Historical verification reco
 report that Elixir was also checked against the expanded sibling checker:
 **41/41**, plus all **1,839 cases / 44,728 steps**. Python now has a working
 mutable, internally locked implementation; its public API and language-domain
-validation differ from Elixir's immutable core. Go's unreleased callbacks/result
+validation differ from Elixir's immutable core. Go's callable-quantum/result
 API and generation-exhaustion restriction are not shared fixed-core requirements.
 The sibling protocol now permits native count-representation exhaustion as a
 resource failure, not malformed input: Go detects counts above native `int` before
@@ -335,6 +332,7 @@ responses stand. This adds no shared count cap or Elixir rejection requirement,
 and guarantees no controlled recovery from actual allocation limits/OOM. Frozen
 vendored documents and identities above remain unchanged.
 
+<!-- site:skip -->
 ## Apply and run the stage-2 kit (owner only)
 
 Already applied over audited stage-1 HEAD `7205252` on
@@ -381,6 +379,7 @@ on this branch. `.loop/loop.log` records exact coder commands, `.loop/coder.*.lo
 holds output and `.loop/notes.*` discarded notes; `STOP` names an exhausted task.
 Keep ignored logs for review; do not blindly rerun STOP. Preparation invokes no
 coder, stages/commits nothing, publishes nothing and changes no installed skill.
+<!-- /site:skip -->
 
 ## Colophon
 
